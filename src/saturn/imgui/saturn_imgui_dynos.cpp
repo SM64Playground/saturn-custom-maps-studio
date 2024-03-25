@@ -239,7 +239,35 @@ void OpenModelSelector(MarioActor* actor) {
                     if (ImGui::Button(ICON_FK_DOWNLOAD " Refresh Packs###refresh_dynos_packs")) {
                         sDynosPacks.Clear();
                         DynOS_Opt_Init();
+                        std::vector<std::string> model_names = {};
+                        MarioActor* actor = gMarioActorList;
+                        while (actor) {
+                            if (actor->selected_model == -1) model_names.push_back("");
+                            else model_names.push_back(model_list[actor->selected_model].FolderName);
+                            actor = actor->next;
+                        }
                         model_list = GetModelList("dynos/packs");
+                        actor = gMarioActorList;
+                        int iter = 0;
+                        while (actor) {
+                            std::string name = model_names[iter++];
+                            if (name != "") {
+                                bool cannot_find = true;
+                                for (int i = 0; i < model_list.size(); i++) {
+                                    if (model_list[i].FolderName == name) {
+                                        actor->selected_model = i;
+                                        actor->model = model_list[i];
+                                        cannot_find = false;
+                                        break;
+                                    }
+                                }
+                                if (cannot_find) {
+                                    actor->selected_model = -1;
+                                    actor->model = Model();
+                                }
+                            }
+                            actor = actor->next;
+                        }
                         ImGui::CloseCurrentPopup();
                     }
                     ImGui::SameLine(); imgui_bundled_help_marker("WARNING: Experimental - this will probably lag the game.");
