@@ -637,7 +637,10 @@ static void import_texture(int tile) {
     // the "texture data" is actually a C string with the path to our texture in it
     // load it from an external image in our data path
     char texname[SYS_MAX_PATH];
-    snprintf(texname, sizeof(texname), FS_TEXTUREDIR "/%s", (const char*)rdp.loaded_texture[tile].addr);
+    char texpath[SYS_MAX_PATH];
+    saturn_get_textures_folder(texpath);
+    snprintf(texname, sizeof(texname), "%s" "%s", texpath, (const char*)rdp.loaded_texture[tile].addr);
+    saturn_fallback_texture(texname, (const char*)rdp.loaded_texture[tile].addr);
     load_texture(texname);
 #else
     // the texture data is actual texture data

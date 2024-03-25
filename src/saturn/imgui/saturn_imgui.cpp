@@ -115,6 +115,7 @@ bool splash_finished = false;
 
 std::string editor_theme = "moon";
 std::vector<std::pair<std::string, std::string>> theme_list = {};
+std::vector<std::string> textures_list = {};
 
 float game_viewport[4] = { 0, 0, -1, -1 };
 
@@ -595,6 +596,18 @@ void saturn_load_themes() {
         if (!json.isMember("name")) continue;
         std::cout << "Found theme " << json["name"].asString() << " (" << id << ")" << std::endl;
         theme_list.push_back({ id, json["name"].asString() });
+    }
+}
+
+void saturn_load_textures() {
+    if (!std::filesystem::exists("dynos/textures")) {
+        std::filesystem::create_directory("dynos/textures");
+    }
+    for (const auto& entry : std::filesystem::directory_iterator("dynos/textures")) {
+        if (!entry.is_directory()) continue;
+        std::string name = entry.path().filename().string();
+        if (string_hash(name.data(), 0, name.length()) == configEditorTextures) current_texture_id = textures_list.size();
+        textures_list.push_back(entry.path().filename().string());
     }
 }
 
@@ -1486,6 +1499,23 @@ void saturn_keyframe_helper(std::string id, float* value, float max) {
 
 bool saturn_disable_sm64_input() {
     return ImGui::GetIO().WantTextInput;
+}
+
+void saturn_get_textures_folder(char* out) {
+    std::string path;
+    if (current_texture_id == -1) path = FS_TEXTUREDIR "/";
+    else path = "../dynos/textures/" + textures_list[current_texture_id] + "/";
+    memcpy(out, path.data(), path.length() + 1);
+}
+
+void saturn_fallback_texture(char* tex, const char* path) {
+    fs_file_t* f = fs_open(tex);
+    if (f) {
+        fs_close(f);
+        return;
+    }
+    std::string fallback = std::string(FS_TEXTUREDIR "/") + path;
+    memcpy(tex, fallback.data(), fallback.length() + 1);
 }
 
 template <typename T>
