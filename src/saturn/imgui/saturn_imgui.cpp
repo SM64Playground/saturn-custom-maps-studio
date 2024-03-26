@@ -940,12 +940,12 @@ void saturn_imgui_update() {
         if (ImGui::CollapsingHeader("Camera")) {
             windowCcEditor = false;
 
-            if (ImGui::Checkbox("Mount Camera", (bool*)&gIsCameraMounted)) {
-                if (gIsCameraMounted) {
-                    vec3f_copy(cameraPos, freezecamPos);
-                    cameraYaw = freezecamYaw;
-                    cameraPitch = freezecamPitch;
-                }
+            ImGui::Checkbox("Mount Camera", (bool*)&gIsCameraMounted);
+            if (!gIsCameraMounted) if (ImGui::Button("Mount and Copy")) {
+                gIsCameraMounted = true;
+                vec3f_copy(freezecamPos, cameraPos);
+                freezecamYaw = cameraYaw;
+                freezecamPitch = cameraPitch;
             }
 
             if (camera_frozen) {
