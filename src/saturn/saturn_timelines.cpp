@@ -25,6 +25,7 @@ std::map<std::string, std::vector<std::string>> kf_switch_names = {
 #define ARR_ENTRY(arr, index) (void*)(offsetof(MarioActor, arr) + index * sizeof(*((MarioActor*)0)->arr))
 #define CC_ENTRY(index) ARR_ENTRY(colorcode, index)
 #define BONE_ENTRY(index) ARR_ENTRY(bones, index)
+#define SCALER_ENTRY(index) ARR_ENTRY(scaler, index)
 
 // { id, { variable_ptr, type, behavior, name, precision, num_values, is_mario } }
 void saturn_fill_data_table() {
@@ -35,6 +36,9 @@ void saturn_fill_data_table() {
     SATURN_KFENTRY_FLOAT("k_shade_z", &world_light_dir3, 1, "Shade Z", false);
     SATURN_KFENTRY_FLOAT("k_shade_t", &world_light_dir4, 1, "Shade Tex", false);
     SATURN_KFENTRY_FLOAT("k_scale", MARIO_ENTRY(xScale), 3, "Scale", true);
+    SATURN_KFENTRY_FLOAT("k_rh_scale", SCALER_ENTRY(0), 3, "Right Hand Scale", true);
+    SATURN_KFENTRY_FLOAT("k_lh_scale", SCALER_ENTRY(1), 3, "Left Hand Scale", true);
+    SATURN_KFENTRY_FLOAT("k_rf_scale", SCALER_ENTRY(2), 3, "Right Foot Scale", true);
     SATURN_KFENTRY_BOOL("k_v_cap_emblem", MARIO_ENTRY(show_emblem), "M Cap Emblem", true);
     SATURN_KFENTRY_FLOAT("k_angle", MARIO_ENTRY(angle), 1, "Mario Angle", true);
     SATURN_KFENTRY_FLOAT("k_mariopos_x", MARIO_ENTRY(x), 1, "Mario Pos X", true);

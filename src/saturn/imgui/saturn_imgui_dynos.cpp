@@ -426,6 +426,25 @@ void sdynos_imgui_menu(int index) {
                         actor->zScale = 1.f;
                     }
                 }
+                if (link_scaling) {
+                    ImGui::SliderFloat("RH Size", &actor->scaler[0][0], -2, 2);
+                    saturn_keyframe_popout("k_rh_scale");
+                    ImGui::SliderFloat("LH Size", &actor->scaler[1][0], -2, 2);
+                    saturn_keyframe_popout("k_lh_scale");
+                    ImGui::SliderFloat("RF Size", &actor->scaler[2][0], -2, 2);
+                    saturn_keyframe_popout("k_rf_scale");
+                    vec3f_set(actor->scaler[0], actor->scaler[0][0], actor->scaler[0][0], actor->scaler[0][0]);
+                    vec3f_set(actor->scaler[1], actor->scaler[1][0], actor->scaler[1][0], actor->scaler[1][0]);
+                    vec3f_set(actor->scaler[2], actor->scaler[2][0], actor->scaler[2][0], actor->scaler[2][0]);
+                }
+                else {
+                    ImGui::SliderFloat3("RH Size", actor->scaler[0], -2, 2);
+                    saturn_keyframe_popout("k_rh_scale");
+                    ImGui::SliderFloat3("LH Size", actor->scaler[1], -2, 2);
+                    saturn_keyframe_popout("k_lh_scale");
+                    ImGui::SliderFloat3("RF Size", actor->scaler[2], -2, 2);
+                    saturn_keyframe_popout("k_rf_scale");
+                }
 
                 if (mario_exists) {
                     Vec3f actor_pos;
