@@ -402,7 +402,7 @@ void saturn_get_game_bounds(float* out, ImVec2 size) {
         }
         else {
             out[2] = size.x;
-            out[3] = size.x * aspect_ratio;
+            out[3] = size.x / aspect_ratio;
         }
         out[0] = (size.x - out[2]) / 2;
         out[1] = (size.y - out[3]) / 2;
