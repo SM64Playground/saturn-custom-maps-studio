@@ -382,15 +382,27 @@ void imgui_update_theme() {
 int selected_video_format = 0;
 int videores[] = { 1920, 1080 };
 bool capturing_video = false;
+bool orthographic_mode = false;
 bool transparency_enabled = true;
 int stop_capture = 0;
 bool video_antialias = true;
+struct OrthographicRenderSettings ortho = (struct OrthographicRenderSettings) {
+    .orthographic_scale = 1.f,
+    .orthographic_offset_x = 0.f,
+    .orthographic_offset_y = 0.f,
+    .orthographic_rotation_x = 25.f,
+    .orthographic_rotation_y = 45.f,
+};
 int video_timer = 0; // used for 1 frame delays on video captures
                      // without this, its always 1 frame behind
 
 const float ANTIALIAS_MODIFIER = 1.f;
 
 bool keep_aspect_ratio = false;
+
+struct OrthographicRenderSettings* saturn_imgui_get_ortho_settings() {
+    return &ortho;
+}
 
 void saturn_get_game_bounds(float* out, ImVec2 size) {
     if (keep_aspect_ratio || saturn_imgui_is_capturing_video()) {
@@ -502,6 +514,10 @@ bool saturn_imgui_is_capturing_video() {
     return capturing_video;
 }
 
+bool saturn_imgui_is_orthographic() {
+    return orthographic_mode;
+}
+
 void saturn_imgui_stop_capture() {
     if (stop_capture > 0) return;
     stop_capture = 2;
@@ -552,6 +568,7 @@ void saturn_imgui_create_dockspace_layout(ImGuiID dockspace) {
     ImGui::DockBuilderSplitNode(up, ImGuiDir_Left, 0.25f, &left, &right);
     ImGui::DockBuilderDockWindow("Machinima", left);
     ImGui::DockBuilderDockWindow("Marios", left);
+    ImGui::DockBuilderDockWindow("Isometric", left);
     ImGui::DockBuilderDockWindow("Settings", left);
     ImGui::DockBuilderDockWindow("Game", right);
     ImGui::DockBuilderDockWindow("Timeline###kf_timeline", down);
@@ -683,7 +700,7 @@ void saturn_imgui_handle_events(SDL_Event * event) {
             if(event->key.keysym.sym == SDLK_SCROLLLOCK) {
                 imgui_update_theme();
             }
-            if(event->key.keysym.sym == SDLK_F9) {
+            /*if(event->key.keysym.sym == SDLK_F9) {
                 DynOS_Gfx_GetPacks().Clear();
                 DynOS_Opt_Init();
                 //model_details = "" + std::to_string(DynOS_Gfx_GetPacks().Count()) + " model pack";
@@ -692,7 +709,7 @@ void saturn_imgui_handle_events(SDL_Event * event) {
 
                 if (gCurrLevelNum > 3 || !mario_exists)
                     DynOS_ReturnToMainMenu();
-            }
+            }*/
 
             if(event->key.keysym.sym == SDLK_F6) {
                 k_popout_open = !k_popout_open;
@@ -1020,17 +1037,9 @@ void saturn_imgui_update() {
             schroma_imgui_update();
             if (!autoChroma && gCurrLevelNum != LEVEL_SA) ImGui::EndDisabled();
         }
-
-        if (ImGui::CollapsingHeader("Recording")) {
-            if (!ffmpeg_installed) {
-                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.f);
-                if (ImGui::BeginChild("###no_ffmpeg", ImVec2(0, 48), true, ImGuiWindowFlags_NoScrollbar)) {
-                    ImGui::Text("FFmpeg isn't installed, so some");
-                    ImGui::Text("video formats aren't supported.");
-                    ImGui::EndChild();
-                }
-                ImGui::PopStyleVar();
-            }
+        
+        orthographic_mode = false;
+        if (ImGui::CollapsingHeader("Rendering")) {
             if (ImGui::BeginCombo("###res_preset", "Resolution Preset")) {
                 if (ImGui::Selectable("240p 4:3 (N64)")) { videores[0] =  320; videores[1] =  240; }
                 if (ImGui::Selectable("360p 4:3"))       { videores[0] =  480; videores[1] =  360; }
@@ -1044,24 +1053,9 @@ void saturn_imgui_update() {
                 ImGui::EndCombo();
             }
             ImGui::InputInt2("Resolution", videores);
-            std::vector<std::pair<int, std::string>> video_formats = video_renderer_get_formats();
-            if (ImGui::BeginCombo("Video Format", video_formats[selected_video_format].second.c_str())) {
-                for (int i = 0; i < video_formats.size(); i++) {
-                    bool ffmpeg_required = video_formats[i].first & VIDEO_RENDERER_FLAGS_FFMPEG;
-                    bool is_selected = selected_video_format == i;
-                    if (!ffmpeg_installed && ffmpeg_required) ImGui::BeginDisabled();
-                    if (ImGui::Selectable(video_formats[i].second.c_str(), is_selected)) {
-                        selected_video_format = i;
-                        saturn_set_video_renderer(i);
-                    }
-                    if (is_selected) ImGui::SetItemDefaultFocus();
-                    if (!ffmpeg_installed && ffmpeg_required) ImGui::EndDisabled();
-                }
-                ImGui::EndCombo();
-            }
             ImGui::Checkbox("Preview Aspect Ratio", &keep_aspect_ratio);
             ImGui::Checkbox("Anti-aliasing", &video_antialias);
-            bool transparency_supported = video_renderer_flags & VIDEO_RENDERER_FLAGS_TRANSPARECY;
+            bool transparency_supported = (video_renderer_flags & VIDEO_RENDERER_FLAGS_TRANSPARECY) || orthographic_mode;
             bool transparency_checkbox = transparency_enabled && transparency_supported;
             if (!transparency_supported) ImGui::BeginDisabled();
             if (ImGui::Checkbox("Transparency", &transparency_checkbox)) transparency_enabled = !transparency_enabled;
@@ -1070,18 +1064,73 @@ void saturn_imgui_update() {
                 ImGui::Text(ICON_FK_EXCLAMATION_TRIANGLE " This video format doesn't");
                 ImGui::Text("support transparency");
             }
-            ImGui::Separator();
-            if (ImGui::Button("Capture Screenshot (.png)")) {
-                capturing_video = true;
-                keyframe_playing = false;
-                video_timer = VIDEO_FRAME_DELAY;
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Render Video")) {
-                capturing_video = true;
-                video_timer = VIDEO_FRAME_DELAY;
-                saturn_play_keyframe();
-                video_renderer_init(videores[0], videores[1]);
+            if (ImGui::BeginTabBar("###render_tab_bar")) {
+                if (ImGui::BeginTabItem("Normal")) {
+                    if (!ffmpeg_installed) {
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.f);
+                        if (ImGui::BeginChild("###no_ffmpeg", ImVec2(0, 48), true, ImGuiWindowFlags_NoScrollbar)) {
+                            ImGui::Text("FFmpeg isn't installed, so some");
+                            ImGui::Text("video formats aren't supported.");
+                            ImGui::EndChild();
+                        }
+                        ImGui::PopStyleVar();
+                    }
+                    std::vector<std::pair<int, std::string>> video_formats = video_renderer_get_formats();
+                    if (ImGui::BeginCombo("Video Format", video_formats[selected_video_format].second.c_str())) {
+                        for (int i = 0; i < video_formats.size(); i++) {
+                            bool ffmpeg_required = video_formats[i].first & VIDEO_RENDERER_FLAGS_FFMPEG;
+                            bool is_selected = selected_video_format == i;
+                            if (!ffmpeg_installed && ffmpeg_required) ImGui::BeginDisabled();
+                            if (ImGui::Selectable(video_formats[i].second.c_str(), is_selected)) {
+                                selected_video_format = i;
+                                saturn_set_video_renderer(i);
+                            }
+                            if (is_selected) ImGui::SetItemDefaultFocus();
+                            if (!ffmpeg_installed && ffmpeg_required) ImGui::EndDisabled();
+                        }
+                        ImGui::EndCombo();
+                    }
+                    ImGui::Separator();
+                    if (ImGui::Button("Capture Screenshot (.png)")) {
+                        capturing_video = true;
+                        keyframe_playing = false;
+                        video_timer = VIDEO_FRAME_DELAY;
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Render Video")) {
+                        capturing_video = true;
+                        video_timer = VIDEO_FRAME_DELAY;
+                        saturn_play_keyframe();
+                        video_renderer_init(videores[0], videores[1]);
+                    }
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem("Orthographic")) {
+                    if (ImGui::BeginPopup("###ortho_yaw_presets")) {
+                        if (ImGui::Selectable("45" )) ortho.orthographic_rotation_y = 45 ;
+                        if (ImGui::Selectable("135")) ortho.orthographic_rotation_y = 135;
+                        if (ImGui::Selectable("225")) ortho.orthographic_rotation_y = 225;
+                        if (ImGui::Selectable("315")) ortho.orthographic_rotation_y = 315;
+                        ImGui::EndPopup();
+                    }
+                    orthographic_mode = true;
+                    ImGui::PushItemWidth(150);
+                    ImGui::DragFloat("Scale", &ortho.orthographic_scale, 0.02f);
+                    ImGui::DragFloat("Yaw", &ortho.orthographic_rotation_y);
+                    ImGui::OpenPopupOnItemClick("###ortho_yaw_presets");
+                    ImGui::DragFloat("Pitch", &ortho.orthographic_rotation_x);
+                    ImGui::DragFloat("Offset X", &ortho.orthographic_offset_x, 2.5f * ortho.orthographic_scale);
+                    ImGui::DragFloat("Offset Y", &ortho.orthographic_offset_y, 2.5f * ortho.orthographic_scale);
+                    ImGui::PopItemWidth();
+                    ImGui::Separator();
+                    if (ImGui::Button("Capture")) {
+                        capturing_video = true;
+                        keyframe_playing = false;
+                        video_timer = VIDEO_FRAME_DELAY;
+                    }
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
             }
         }
     } ImGui::End();

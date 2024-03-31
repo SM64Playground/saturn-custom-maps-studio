@@ -4,6 +4,14 @@
 #include <SDL2/SDL.h>
 #include <PR/ultratypes.h>
 
+struct OrthographicRenderSettings {
+    float orthographic_scale;
+    float orthographic_offset_x;
+    float orthographic_offset_y;
+    float orthographic_rotation_x;
+    float orthographic_rotation_y;
+};
+
 #ifdef __cplusplus
 
 #include <string>
@@ -71,8 +79,10 @@ extern bool request_mario_tab;
 
 extern "C" {
 #endif
+    struct OrthographicRenderSettings* saturn_imgui_get_ortho_settings();
     bool saturn_imgui_is_capturing_transparent_video();
     bool saturn_imgui_is_capturing_video();
+    bool saturn_imgui_is_orthographic();
     void saturn_imgui_stop_capture();
     bool saturn_imgui_get_viewport(int*, int*);
     void saturn_imgui_set_frame_buffer(void* fb, bool do_capture);
