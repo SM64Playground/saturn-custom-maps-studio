@@ -147,6 +147,8 @@ void ssettings_imgui_init() {
 int current_theme_id = 0;
 int current_texture_id = -1;
 
+extern void split_skyboxes();
+
 void ssettings_imgui_update() {
     if (saturn_actor_is_recording_input()) ImGui::EndDisabled();
     std::vector<const char*> theme_names = {};
@@ -172,11 +174,16 @@ void ssettings_imgui_update() {
                 configEditorTextures = string_hash(textures_list[i].c_str(), 0, textures_list[i].length());
                 current_texture_id = i;
                 gfx_precache_textures();
+                split_skyboxes();
             }
         }
         ImGui::EndCombo();
     }
     ImGui::SameLine(); imgui_bundled_help_marker("Changes the in-game textures.");
+    if (ImGui::Button("Clear Texture Cache")) {
+        gfx_precache_textures();
+        split_skyboxes();
+    }
     ImGui::PopItemWidth();
 #ifdef DISCORDRPC
     ImGui::Checkbox(ICON_FK_DISCORD " Discord Activity Status", &configDiscordRPC);
