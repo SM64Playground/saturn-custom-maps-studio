@@ -1,3 +1,4 @@
+#include "behavior_data.h"
 #include "saturn/saturn_actors.h"
 #include "dynos.cpp.h"
 extern "C" {
@@ -56,6 +57,7 @@ void DynOS_Gfx_SwapAnimations(void *aPtr) {
         pDefaultAnimation = _Object->header.gfx.unk38.curAnim;
 
         // Mario actor
+        if (_Object->behavior != bhvMarioActor) return;
         MarioActor* _Actor = saturn_get_actor(_Object->oMarioActorIndex);
         if (!_Actor) {
             return;
