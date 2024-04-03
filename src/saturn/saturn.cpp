@@ -432,13 +432,15 @@ void saturn_update() {
     else {
         struct OrthographicRenderSettings* ortho = saturn_imgui_get_ortho_settings();
         ortho->orthographic_scale -= mouse_state.scrollwheel * ortho->orthographic_scale * 0.1;
-        if (mouse_state.held & MOUSEBTN_MASK_L) {
-            ortho->orthographic_offset_x += mouse_state.x_diff * 2.5 * ortho->orthographic_scale;
-            ortho->orthographic_offset_y += mouse_state.y_diff * 2.5 * ortho->orthographic_scale;
-        }
-        if (mouse_state.held & MOUSEBTN_MASK_R) {
-            ortho->orthographic_rotation_y += mouse_state.x_diff * 0.2;
-            ortho->orthographic_rotation_x += mouse_state.y_diff * 0.2;
+        if (mouse_state.update_camera) {
+            if (mouse_state.held & MOUSEBTN_MASK_L) {
+                ortho->orthographic_offset_x += mouse_state.x_diff * 2.5 * ortho->orthographic_scale;
+                ortho->orthographic_offset_y += mouse_state.y_diff * 2.5 * ortho->orthographic_scale;
+            }
+            if (mouse_state.held & MOUSEBTN_MASK_R) {
+                ortho->orthographic_rotation_y += mouse_state.x_diff * 0.2;
+                ortho->orthographic_rotation_x += mouse_state.y_diff * 0.2;
+            }
         }
     }
 #undef inv
