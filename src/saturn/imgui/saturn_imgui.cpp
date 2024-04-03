@@ -385,6 +385,7 @@ bool capturing_video = false;
 bool orthographic_mode = false;
 bool transparency_enabled = true;
 int stop_capture = 0;
+int request_ortho_mode = 0;
 bool video_antialias = true;
 struct OrthographicRenderSettings ortho = (struct OrthographicRenderSettings) {
     .orthographic_scale = 1.f,
@@ -516,6 +517,11 @@ bool saturn_imgui_is_capturing_video() {
 
 bool saturn_imgui_is_orthographic() {
     return orthographic_mode;
+}
+
+void saturn_imgui_set_ortho(bool ortho_mode) {
+    request_ortho_mode = ortho_mode + 1;
+    orthographic_mode = ortho_mode;
 }
 
 void saturn_imgui_stop_capture() {
@@ -1038,8 +1044,8 @@ void saturn_imgui_update() {
             if (!autoChroma && gCurrLevelNum != LEVEL_SA) ImGui::EndDisabled();
         }
         
-        orthographic_mode = false;
         if (ImGui::CollapsingHeader("Rendering")) {
+            orthographic_mode = false;
             if (ImGui::BeginCombo("###res_preset", "Resolution Preset")) {
                 if (ImGui::Selectable("240p 4:3 (N64)")) { videores[0] =  320; videores[1] =  240; }
                 if (ImGui::Selectable("360p 4:3"))       { videores[0] =  480; videores[1] =  360; }
@@ -1065,7 +1071,9 @@ void saturn_imgui_update() {
                 ImGui::Text("support transparency");
             }
             if (ImGui::BeginTabBar("###render_tab_bar")) {
-                if (ImGui::BeginTabItem("Normal")) {
+                ImGuiTabItemFlags flags = ImGuiTabItemFlags_None;
+                if (request_ortho_mode == 1) flags = ImGuiTabItemFlags_SetSelected;
+                if (ImGui::BeginTabItem("Normal", nullptr, flags)) {
                     if (!ffmpeg_installed) {
                         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.f);
                         if (ImGui::BeginChild("###no_ffmpeg", ImVec2(0, 48), true, ImGuiWindowFlags_NoScrollbar)) {
@@ -1105,7 +1113,9 @@ void saturn_imgui_update() {
                     }
                     ImGui::EndTabItem();
                 }
-                if (ImGui::BeginTabItem("Orthographic")) {
+                flags = ImGuiTabItemFlags_None;
+                if (request_ortho_mode == 2) flags = ImGuiTabItemFlags_SetSelected;
+                if (ImGui::BeginTabItem("Orthographic", nullptr, flags)) {
                     if (ImGui::BeginPopup("###ortho_yaw_presets")) {
                         if (ImGui::Selectable("45" )) ortho.orthographic_rotation_y = 45 ;
                         if (ImGui::Selectable("135")) ortho.orthographic_rotation_y = 135;
@@ -1130,6 +1140,7 @@ void saturn_imgui_update() {
                     }
                     ImGui::EndTabItem();
                 }
+                request_ortho_mode = 0;
                 ImGui::EndTabBar();
             }
         }

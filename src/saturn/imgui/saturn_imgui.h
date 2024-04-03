@@ -83,6 +83,7 @@ extern "C" {
     bool saturn_imgui_is_capturing_transparent_video();
     bool saturn_imgui_is_capturing_video();
     bool saturn_imgui_is_orthographic();
+    void saturn_imgui_set_ortho(bool ortho_mode);
     void saturn_imgui_stop_capture();
     bool saturn_imgui_get_viewport(int*, int*);
     void saturn_imgui_set_frame_buffer(void* fb, bool do_capture);
