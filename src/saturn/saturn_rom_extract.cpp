@@ -365,6 +365,7 @@ int saturn_rom_status(std::filesystem::path extract_dest, std::vector<std::strin
                 needs_extract = true;
                 if (todo != nullptr) todo->push_back(entry.path);
             }
+            else join_skyboxes(name_without_ext);
             continue;
         }
         if (!std::filesystem::exists(extract_dest / entry.path)) {
