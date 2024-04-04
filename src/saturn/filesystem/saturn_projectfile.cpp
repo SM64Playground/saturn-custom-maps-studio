@@ -396,9 +396,9 @@ void saturn_load_project_list() {
     for (const auto & entry : std::filesystem::directory_iterator(project_dir)) {
         std::filesystem::path path = entry.path();
 
-        if (path.filename().u8string() != "autosave.spj") {
-            if (path.extension().u8string() == ".spj")
-                project_array.push_back(path.filename().u8string());
+        if (path.filename().string() != "autosave.spj") {
+            if (path.extension().string() == ".spj")
+                project_array.push_back(path.filename().string());
         }
     }
 }
