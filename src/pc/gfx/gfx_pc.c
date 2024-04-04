@@ -6,9 +6,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
 #ifndef _LANGUAGE_C
 #define _LANGUAGE_C
 #endif
@@ -531,11 +528,11 @@ void load_texture(const char *fullpath) {
     u8 *imgdata = fs_load_file(fullpath, &imgsize);
     if (imgdata) {
         // TODO: implement stbi_callbacks or some shit instead of loading the whole texture
-        u8 *data = stbi_load_from_memory(imgdata, imgsize, &w, &h, NULL, 4);
+        u8 *data = pngutils_read_png_from_memory(imgdata, imgsize, &w, &h, NULL, 4);
         free(imgdata);
         if (data) {
             gfx_rapi->upload_texture(data, w, h);
-            stbi_image_free(data); // don't need this anymore
+            pngutils_free(data); // don't need this anymore
             return;
         }
     }

@@ -1032,6 +1032,8 @@ bool saturn_begin_extract_rom_thread() {
     return false;
 }
 
+extern void split_skyboxes();
+
 bool saturn_do_load() {
     if (load_thread_began) return loading_finished;
     load_thread_began = true;
@@ -1045,6 +1047,7 @@ bool saturn_do_load() {
         saturn_load_locations();
         saturn_load_favorite_anims();
         saturn_fill_data_table();
+        split_skyboxes();
         saturn_launch_timer = 0;
         loading_finished = true;
     });
