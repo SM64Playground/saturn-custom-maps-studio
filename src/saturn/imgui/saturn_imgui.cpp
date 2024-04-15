@@ -1467,8 +1467,10 @@ void saturn_keyframe_show_kf_content(Keyframe keyframe) {
         ImGui::ColorEdit4("###kfprev_color", (float*)&color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoOptions);
     }
     if (timeline.type == KFTYPE_SWITCH) {
-        if (kf_switch_names.find(keyframe.timelineID) == kf_switch_names.end()) ImGui::Text("u forgor");
-        else ImGui::Text(kf_switch_names[keyframe.timelineID][(int)keyframe.value[0]].c_str());
+        std::string id = keyframe.timelineID;
+        if (timeline.marioIndex != -1) id = id.substr(0, id.length() - 8);
+        if (kf_switch_names.find(id) == kf_switch_names.end()) ImGui::Text("u forgor");
+        else ImGui::Text(kf_switch_names[id][(int)keyframe.value[0]].c_str());
     }
     ImVec2 window_pos = ImGui::GetMousePos();
     ImVec2 window_size = ImGui::GetWindowSize();
