@@ -14,6 +14,7 @@
 #include "saturn/saturn_actors.h"
 #include "saturn_imgui.h"
 #include <SDL2/SDL.h>
+#include "saturn/saturn_json.h"
 
 extern "C" {
 #include "pc/gfx/gfx_pc.h"
@@ -148,6 +149,7 @@ int current_theme_id = 0;
 int current_texture_id = -1;
 
 extern void split_skyboxes();
+extern std::map<std::string, std::string> texture_forwards;
 
 void ssettings_imgui_update() {
     if (saturn_actor_is_recording_input()) ImGui::EndDisabled();
@@ -167,12 +169,23 @@ void ssettings_imgui_update() {
         if (ImGui::Selectable("Vanilla")) {
             configEditorTextures = 0;
             current_texture_id = -1;
+            texture_forwards.clear();
             gfx_precache_textures();
         }
         for (int i = 0; i < textures_list.size(); i++) {
             if (ImGui::Selectable(textures_list[i].c_str())) {
                 configEditorTextures = string_hash(textures_list[i].c_str(), 0, textures_list[i].length());
                 current_texture_id = i;
+                texture_forwards.clear();
+                std::filesystem::path json_path = std::filesystem::path("dynos/textures/") / textures_list[i] / "texture_forwards.json";
+                if (std::filesystem::exists(json_path)) {
+                    std::ifstream file = std::ifstream(json_path);
+                    Json::Value json;
+                    json << file;
+                    for (auto& entry : json.object()) {
+                        texture_forwards.insert({ entry.first, entry.second.asString() });
+                    }
+                }
                 gfx_precache_textures();
                 split_skyboxes();
             }

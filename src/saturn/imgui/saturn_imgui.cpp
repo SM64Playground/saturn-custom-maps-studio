@@ -1561,6 +1561,8 @@ bool saturn_disable_sm64_input() {
     return ImGui::GetIO().WantTextInput;
 }
 
+std::map<std::string, std::string> texture_forwards = {};
+
 void saturn_get_textures_folder(char* out) {
     std::string path;
     if (current_texture_id == -1) path = FS_TEXTUREDIR "/";
@@ -1576,6 +1578,11 @@ void saturn_fallback_texture(char* tex, const char* path) {
     }
     std::string fallback = std::string(FS_TEXTUREDIR "/") + path;
     memcpy(tex, fallback.data(), fallback.length() + 1);
+}
+
+const char* saturn_texture_forward(const char* input) {
+    if (texture_forwards.find(input) == texture_forwards.end()) return input;
+    return texture_forwards[input].c_str();
 }
 
 template <typename T>

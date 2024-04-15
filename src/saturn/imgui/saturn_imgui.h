@@ -94,6 +94,7 @@ extern "C" {
     bool saturn_disable_sm64_input();
     void saturn_get_textures_folder(char* out);
     void saturn_fallback_texture(char* out, const char* path);
+    const char* saturn_texture_forward(const char* input);
     void saturn_load_textures();
 
     extern SDL_Scancode bind_to_sdl_scancode[512];
