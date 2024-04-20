@@ -384,6 +384,7 @@ int videores[] = { 1920, 1080 };
 bool capturing_video = false;
 bool orthographic_mode = false;
 bool transparency_enabled = true;
+bool sixty_fps_enabled = true;
 int stop_capture = 0;
 int request_ortho_mode = 0;
 bool video_antialias = true;
@@ -535,7 +536,7 @@ bool saturn_imgui_is_capturing_transparent_video() {
 
 void saturn_imgui_set_frame_buffer(void* fb, bool do_capture) {
     framebuffer = fb;
-    if (do_capture) saturn_capture_screenshot();
+    if (do_capture || (sixty_fps_enabled && capturing_video && (video_renderer_flags & VIDEO_RENDERER_FLAGS_60FPS))) saturn_capture_screenshot();
 }
 
 // Set up ImGui
@@ -903,6 +904,13 @@ char saturnProjectFilename[257] = "Project";
 int current_project_id;
 char mario_search_prompt[256];
 
+void ImGui_ConditionalCheckbox(const char* label, bool* val, bool cond) {
+    bool checked = *val && cond;
+    if (!cond) ImGui::BeginDisabled();
+    if (ImGui::Checkbox(label, &checked)) *val ^= true;
+    if (!cond) ImGui::EndDisabled();
+}
+
 void saturn_imgui_update() {
     if (!splash_finished) return;
 
@@ -1058,14 +1066,17 @@ void saturn_imgui_update() {
                 if (ImGui::Selectable("8K 16:9"))        { videores[0] = 7680; videores[1] = 4320; }
                 ImGui::EndCombo();
             }
+            bool fps60_supported = (video_renderer_flags & VIDEO_RENDERER_FLAGS_60FPS);
+            bool transparency_supported = (video_renderer_flags & VIDEO_RENDERER_FLAGS_TRANSPARECY) || orthographic_mode;
             ImGui::InputInt2("Resolution", videores);
             ImGui::Checkbox("Preview Aspect Ratio", &keep_aspect_ratio);
             ImGui::Checkbox("Anti-aliasing", &video_antialias);
-            bool transparency_supported = (video_renderer_flags & VIDEO_RENDERER_FLAGS_TRANSPARECY) || orthographic_mode;
-            bool transparency_checkbox = transparency_enabled && transparency_supported;
-            if (!transparency_supported) ImGui::BeginDisabled();
-            if (ImGui::Checkbox("Transparency", &transparency_checkbox)) transparency_enabled = !transparency_enabled;
-            if (!transparency_supported) ImGui::EndDisabled();
+            ImGui_ConditionalCheckbox("60 FPS", &sixty_fps_enabled, fps60_supported && configFps60);
+            ImGui_ConditionalCheckbox("Transparency", &transparency_enabled, transparency_supported);
+            if (!fps60_supported) {
+                ImGui::Text(ICON_FK_EXCLAMATION_TRIANGLE " This video format doesn't");
+                ImGui::Text("support 60 FPS framerate");
+            }
             if (!transparency_supported) {
                 ImGui::Text(ICON_FK_EXCLAMATION_TRIANGLE " This video format doesn't");
                 ImGui::Text("support transparency");
@@ -1109,7 +1120,7 @@ void saturn_imgui_update() {
                         capturing_video = true;
                         video_timer = VIDEO_FRAME_DELAY;
                         saturn_play_keyframe();
-                        video_renderer_init(videores[0], videores[1]);
+                        video_renderer_init(videores[0], videores[1], sixty_fps_enabled);
                     }
                     ImGui::EndTabItem();
                 }
