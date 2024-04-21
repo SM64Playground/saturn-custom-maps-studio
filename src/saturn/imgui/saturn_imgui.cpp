@@ -471,8 +471,8 @@ void saturn_capture_screenshot() {
             int j = ((videores[1] - y - 1) * videores[0] + x) * 4;
             int r = 0, g = 0, b = 0, a = 0;
             if (video_antialias) {
-                for (int X = 0; X < 2; X++) {
-                    for (int Y = 0; Y < 2; Y++) {
+                for (int X = 0; X <= 2; X++) {
+                    for (int Y = 0; Y <= 2; Y++) {
                         int I = ((Y + y * 2) * in_height + (X + x * 2)) * 4;
                         r += image[I + 0];
                         g += image[I + 1];
@@ -480,7 +480,7 @@ void saturn_capture_screenshot() {
                         a += image[I + 3];
                     }
                 }
-                r /= 4.f; g /= 4.f; b /= 4.f; a /= 4.f;
+                r /= 9.f; g /= 9.f; b /= 9.f; a /= 9.f;
             }
             else {
                 r = image[i + 0];
