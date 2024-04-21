@@ -25,10 +25,12 @@ extern "C" {
 
 #include "saturn/saturn_timelines.h"
 
-#define SATURN_PROJECT_VERSION 2
+#define SATURN_PROJECT_VERSION 3
 
 std::string current_project = "";
 int project_load_timer = 0;
+
+std::vector<int> actors_for_deletion = {};
 
 bool saturn_project_level_handler(SaturnFormatStream* stream, int version) {
     int level = saturn_format_read_int8(stream);
@@ -124,6 +126,15 @@ bool saturn_project_autochroma_handler(SaturnFormatStream* stream, int version) 
 }
 
 bool saturn_project_mario_actor_handler(SaturnFormatStream* stream, int version) {
+    if (version >= 3) {
+        bool exists = saturn_format_read_bool(stream);
+        if (!exists) {
+            actors_for_deletion.push_back(saturn_actor_sizeof());
+            MarioActor actor = MarioActor();
+            saturn_add_actor(actor);
+            return true;
+        }
+    }
     char name[256];
     saturn_format_read_string(stream, name, 255);
     char modelname[256];
@@ -273,6 +284,7 @@ bool saturn_project_custom_anim_handler(SaturnFormatStream* stream, int version)
 void saturn_load_project(char* filename) {
     k_frame_keys.clear();
     saturn_clear_actors();
+    actors_for_deletion.clear();
     current_project = filename;
     saturn_format_input((char*)(std::string("dynos/projects/") + filename).c_str(), "SSPJ", {
         { "GENV", saturn_project_game_environment_handler },
@@ -282,6 +294,9 @@ void saturn_load_project(char* filename) {
         { "LEVL", saturn_project_level_handler },
         { "CANM", saturn_project_custom_anim_handler },
     });
+    for (int index : actors_for_deletion) {
+        saturn_remove_actor(index);
+    }
     for (auto& entry : k_frame_keys) {
         saturn_keyframe_apply(entry.first, k_current_frame);
     }
@@ -358,11 +373,14 @@ void saturn_save_project(char* filename) {
     }
     MarioActor* actor = saturn_get_actor(0);
     while (actor) {
+        saturn_format_new_section(stream, "MACT");
         if (!actor->exists) {
+            saturn_format_write_bool(stream, false);
+            saturn_format_close_section(stream);
             actor = actor->next;
             continue;
         }
-        saturn_format_new_section(stream, "MACT");
+        saturn_format_write_bool(stream, true);
         saturn_format_write_string(stream, actor->name);
         if (actor->selected_model == -1) saturn_format_write_int8(stream, 0);
         else saturn_format_write_string(stream, (char*)actor->model.Name.c_str());
