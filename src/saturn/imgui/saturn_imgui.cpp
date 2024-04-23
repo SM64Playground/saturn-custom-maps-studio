@@ -1276,6 +1276,7 @@ void saturn_imgui_update() {
                 saturn_remove_actor(mario_menu_index);
             }
             ImGui::PopStyleColor();
+            if (gIsCameraMounted) ImGui::BeginDisabled(true);
             if (ImGui::MenuItem(ICON_FK_EYE " Look at")) {
                 Vec3f mpos;
                 float dist;
@@ -1286,6 +1287,7 @@ void saturn_imgui_update() {
                 cameraPitch = pitch;
                 cameraYaw = yaw;
             }
+            if (gIsCameraMounted) ImGui::EndDisabled();
             sdynos_imgui_menu(mario_menu_index);
             ImGui::EndPopup();
         }
