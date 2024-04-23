@@ -140,6 +140,8 @@ f32 mario_headrot_speed = 10.0f;
 
 struct Object* saturn_camera_object = nullptr;
 
+bool setting_mario_struct_pos = false;
+
 extern "C" {
 #include "game/camera.h"
 #include "game/area.h"
@@ -595,7 +597,27 @@ void saturn_update() {
         }
     }*/
 
-    if (mouse_state.dist_travelled <= 3 && mouse_state.released && mouse_state.focused_on_game && !saturn_actor_is_recording_input() && !saturn_imgui_is_orthographic()) {
+    bool should_do_mouse_action = mouse_state.dist_travelled <= 3 && mouse_state.released && mouse_state.focused_on_game && !saturn_actor_is_recording_input() && !saturn_imgui_is_orthographic();
+
+    if (setting_mario_struct_pos) {
+        Vec3f dir, hit;
+        s16 yaw, pitch;
+        float dist;
+        float x = (mouse_state.x - game_viewport[0]) / game_viewport[2];
+        float y = (mouse_state.y - game_viewport[1]) / game_viewport[3];
+        struct Surface* surface = nullptr;
+        vec3f_get_dist_and_angle(gCamera->pos, gCamera->focus, &dist, &pitch, &yaw);
+        get_raycast_dir(dir, yaw, pitch, camera_fov, gfx_current_dimensions.aspect_ratio, x, y);
+        vec3f_mul(dir, 8000);
+        find_surface_on_ray(gCamera->pos, dir, &surface, hit);
+        vec3f_get_dist_and_angle(hit, gCamera->pos, &dist, &pitch, &yaw);
+        vec3f_copy(gMarioState->pos, hit);
+        gMarioState->fAngle = yaw;
+        if (should_do_mouse_action && (mouse_state.released & MOUSEBTN_MASK_L)) {
+            setting_mario_struct_pos = false;
+        }
+    }
+    else if (should_do_mouse_action) {
         Vec3f dir, hit;
         s16 yaw, pitch;
         float dist;

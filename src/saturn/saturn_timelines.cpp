@@ -61,6 +61,10 @@ void saturn_fill_data_table() {
     SATURN_KFENTRY_FLOAT("k_c_camera_pitch", &freezecamPitch, 1, "Camera Pitch", false);
     SATURN_KFENTRY_FLOAT("k_c_camera_roll", &freezecamRoll, 1, "Camera Roll", false);
     SATURN_KFENTRY_FLOAT("k_gravity", &gravity, 1, "Gravity", false);
+    SATURN_KFENTRY_FLOAT("k_mariostruct_x", gMarioState->pos + 0, 1, "Mario Struct X", false);
+    SATURN_KFENTRY_FLOAT("k_mariostruct_y", gMarioState->pos + 1, 1, "Mario Struct Y", false);
+    SATURN_KFENTRY_FLOAT("k_mariostruct_z", gMarioState->pos + 2, 1, "Mario Struct Z", false);
+    SATURN_KFENTRY_FLOAT("k_mariostruct_angle", &gMarioState->fAngle, 1, "Mario Struct Angle", false);
     SATURN_KFENTRY_COLORF("k_light_col", gLightingColor, "Light Color", false);
     SATURN_KFENTRY_COLOR("k_color", &chromaColor, "Skybox Color", false);
     SATURN_KFENTRY_COLOR("k_hat", CC_ENTRY(CC_HAT), "Hat", true);

@@ -1202,6 +1202,26 @@ void saturn_imgui_update() {
             }
             if (nearest_index != -1) saturn_imgui_open_mario_menu(nearest_index);
         }
+        if (ImGui::BeginMenu("Mario Struct")) {
+            ImGui::PushItemWidth(50);
+            ImGui::DragFloat("###mariostruct_x", gMarioState->pos + 0, 1.f, 0.f, 0.f, "X");
+            ImGui::SameLine();
+            ImGui::DragFloat("###mariostruct_y", gMarioState->pos + 1, 1.f, 0.f, 0.f, "Y");
+            ImGui::SameLine();
+            ImGui::DragFloat("###mariostruct_z", gMarioState->pos + 2, 1.f, 0.f, 0.f, "Z");
+            ImGui::PopItemWidth();
+            saturn_keyframe_popout({ "k_mariostruct_x", "k_mariostruct_y", "k_mariostruct_z" });
+            ImGui::PushItemWidth(100);
+            ImGui::DragFloat("Angle###mariostruct_angle", &gMarioState->fAngle, 128.f);
+            ImGui::PopItemWidth();
+            saturn_keyframe_popout("k_mariostruct_angle");
+            ImGui::Separator();
+            if (ImGui::MenuItem("Set Position and Angle")) {
+                setting_mario_struct_pos = true;
+            }
+            ImGui::EndMenu();
+        }
+        imgui_bundled_tooltip("This Mario is used for calculations in enemy\nbehaviors and is not visible in renders.");
         ImGui::Separator();
         ImGui::InputTextWithHint("###mariosearch", ICON_FK_SEARCH " Search...", mario_search_prompt, 256);
         MarioActor* actor = gMarioActorList;

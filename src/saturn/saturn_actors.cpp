@@ -1,7 +1,9 @@
 #include "saturn_actors.h"
+#include "behavior_data.h"
 #include "game/object_helpers.h"
 #include "mario_animation_ids.h"
 #include "saturn/saturn.h"
+#include "saturn/saturn_colors.h"
 #include "saturn/saturn_models.h"
 #include "sm64.h"
 
@@ -187,13 +189,25 @@ void bhv_mario_actor_loop() {
     }
 }
 
+ColorCode default_cc;
+bool inited_default_cc = false;
+
 void override_cc_color(int* r, int* g, int* b, int ccIndex, int marioIndex, int shadeIndex, float intensity, bool additive) {
+    if (!inited_default_cc) {
+        inited_default_cc = true;
+        PasteGameShark(DEFAULT_COLOR_CODE, default_cc);
+    }
+    ColorCode cc;
     MarioActor* actor = saturn_get_actor(marioIndex);
     if (o->behavior != bhvMarioActor) actor = nullptr;
-    if (actor == nullptr) return;
-    *r = (*r * additive) + intensity * actor->colorcode[ccIndex].red[shadeIndex];
-    *g = (*g * additive) + intensity * actor->colorcode[ccIndex].green[shadeIndex];
-    *b = (*b * additive) + intensity * actor->colorcode[ccIndex].blue[shadeIndex];
+    if (actor == nullptr) {
+        if (o->behavior == bhvMario) memcpy(cc, default_cc, sizeof(ColorCode));
+        else return; 
+    }
+    else memcpy(cc, actor->colorcode, sizeof(ColorCode));
+    *r = (*r * additive) + intensity * cc[ccIndex].red[shadeIndex];
+    *g = (*g * additive) + intensity * cc[ccIndex].green[shadeIndex];
+    *b = (*b * additive) + intensity * cc[ccIndex].blue[shadeIndex];
 }
 
 bool saturn_rotate_head(Vec3s rotation) {
@@ -253,7 +267,7 @@ s16 saturn_actor_geo_switch(u8 item) {
 void saturn_actor_get_scaler(Vec3f scale, int index) {
     MarioActor* actor = saturn_get_actor(o->oMarioActorIndex);
     if (o->behavior != bhvMarioActor) actor = nullptr;
-    if (actor == nullptr) vec3f_set(scale, 0, 0, 0);
+    if (actor == nullptr) vec3f_set(scale, 1, 1, 1);
     else vec3f_copy(scale, actor->scaler[index]);
 }
 
@@ -273,6 +287,7 @@ bool saturn_actor_has_custom_anim_extra() {
 }
 
 int saturn_actor_get_support_flags(int marioIndex) {
+    if (o->behavior == bhvMario) return 1;
     MarioActor* actor = saturn_get_actor(marioIndex);
     if (o->behavior != bhvMarioActor) actor = nullptr;
     if (actor == nullptr) return 0;
