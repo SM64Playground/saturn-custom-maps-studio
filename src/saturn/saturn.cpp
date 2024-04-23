@@ -432,16 +432,15 @@ void saturn_update() {
         }
     }
     else {
-        struct OrthographicRenderSettings* ortho = saturn_imgui_get_ortho_settings();
-        ortho->orthographic_scale -= mouse_state.scrollwheel * ortho->orthographic_scale * 0.1;
+        ortho_settings.scale -= mouse_state.scrollwheel * ortho_settings.scale * 0.1;
         if (mouse_state.update_camera) {
             if (mouse_state.held & MOUSEBTN_MASK_L) {
-                ortho->orthographic_offset_x += mouse_state.x_diff * 2.5 * ortho->orthographic_scale;
-                ortho->orthographic_offset_y += mouse_state.y_diff * 2.5 * ortho->orthographic_scale;
+                ortho_settings.offset_x += mouse_state.x_diff * 2.5 * ortho_settings.scale;
+                ortho_settings.offset_y += mouse_state.y_diff * 2.5 * ortho_settings.scale;
             }
             if (mouse_state.held & MOUSEBTN_MASK_R) {
-                ortho->orthographic_rotation_y += mouse_state.x_diff * 0.2;
-                ortho->orthographic_rotation_x += mouse_state.y_diff * 0.2;
+                ortho_settings.rotation_y += mouse_state.x_diff * 0.2;
+                ortho_settings.rotation_x += mouse_state.y_diff * 0.2;
             }
         }
     }
@@ -498,10 +497,9 @@ void saturn_update() {
     if (gCamera) {
         saturn_camera_object->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
         if (saturn_imgui_is_orthographic()) {
-            struct OrthographicRenderSettings* ortho = saturn_imgui_get_ortho_settings();
-            float pitch = ortho->orthographic_rotation_x, yaw  = ortho->orthographic_rotation_y;
-            float offX  = ortho->orthographic_offset_x  , offY = ortho->orthographic_offset_y  ;
-            float scale = ortho->orthographic_scale;
+            float pitch = ortho_settings.rotation_x, yaw  = ortho_settings.rotation_y;
+            float offX  = ortho_settings.offset_x  , offY = ortho_settings.offset_y  ;
+            float scale = ortho_settings.scale;
             pitch = pitch / 360 * 65536;
             yaw   = yaw   / 360 * 65536;
             vec3f_set(gCamera->pos, 0, 0, 0);

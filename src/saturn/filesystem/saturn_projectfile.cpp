@@ -77,12 +77,11 @@ bool saturn_project_game_environment_handler(SaturnFormatStream* stream, int ver
         freezecamYaw = fry;
         freezecamPitch = frx;
         freezecamRoll = frz;
-        struct OrthographicRenderSettings* ortho = saturn_imgui_get_ortho_settings();
-        ortho->orthographic_scale = osc;
-        ortho->orthographic_rotation_x = orx;
-        ortho->orthographic_rotation_y = ory;
-        ortho->orthographic_offset_x = oox;
-        ortho->orthographic_offset_y = ooy;
+        ortho_settings.scale = osc;
+        ortho_settings.rotation_x = orx;
+        ortho_settings.rotation_y = ory;
+        ortho_settings.offset_x = oox;
+        ortho_settings.offset_y = ooy;
     }
     else {
         vec3f_set(cameraPos, cpx, cpy, cpz);
@@ -304,7 +303,6 @@ void saturn_load_project(char* filename) {
 }
 
 void saturn_save_project(char* filename) {
-    struct OrthographicRenderSettings* ortho = saturn_imgui_get_ortho_settings();
     SaturnFormatStream _stream = saturn_format_output("SSPJ", SATURN_PROJECT_VERSION);
     SaturnFormatStream* stream = &_stream;
     saturn_format_new_section(stream, "LEVL");
@@ -334,11 +332,11 @@ void saturn_save_project(char* filename) {
     saturn_format_write_float(stream, freezecamPitch);
     saturn_format_write_float(stream, freezecamYaw);
     saturn_format_write_float(stream, freezecamRoll);
-    saturn_format_write_float(stream, ortho->orthographic_scale);
-    saturn_format_write_float(stream, ortho->orthographic_rotation_x);
-    saturn_format_write_float(stream, ortho->orthographic_rotation_y);
-    saturn_format_write_float(stream, ortho->orthographic_offset_x);
-    saturn_format_write_float(stream, ortho->orthographic_offset_y);
+    saturn_format_write_float(stream, ortho_settings.scale);
+    saturn_format_write_float(stream, ortho_settings.rotation_x);
+    saturn_format_write_float(stream, ortho_settings.rotation_y);
+    saturn_format_write_float(stream, ortho_settings.offset_x);
+    saturn_format_write_float(stream, ortho_settings.offset_y);
     saturn_format_write_float(stream, camera_fov);
     saturn_format_write_float(stream, camera_focus);
     saturn_format_write_float(stream, camVelSpeed);

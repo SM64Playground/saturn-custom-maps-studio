@@ -5,12 +5,14 @@
 #include <PR/ultratypes.h>
 
 struct OrthographicRenderSettings {
-    float orthographic_scale;
-    float orthographic_offset_x;
-    float orthographic_offset_y;
-    float orthographic_rotation_x;
-    float orthographic_rotation_y;
+    float scale;
+    float offset_x;
+    float offset_y;
+    float rotation_x;
+    float rotation_y;
 };
+
+extern struct OrthographicRenderSettings ortho_settings;
 
 #ifdef __cplusplus
 
@@ -79,7 +81,6 @@ extern bool request_mario_tab;
 
 extern "C" {
 #endif
-    struct OrthographicRenderSettings* saturn_imgui_get_ortho_settings();
     bool saturn_imgui_is_capturing_transparent_video();
     bool saturn_imgui_is_capturing_video();
     bool saturn_imgui_is_orthographic();

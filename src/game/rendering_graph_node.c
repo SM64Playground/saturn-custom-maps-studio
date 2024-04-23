@@ -316,9 +316,8 @@ static void geo_process_perspective(struct GraphNodePerspective *node) {
 
         bool interpolate = gGlobalTimer == node->prevTimestamp + 1 && gGlobalTimer != gLakituState.skipCameraInterpolationTimestamp;
         if (saturn_imgui_is_orthographic()) {
-            struct OrthographicRenderSettings* ortho = saturn_imgui_get_ortho_settings();
-            float w = 1000.f * ortho->orthographic_scale * aspect / 2;
-            float h = 1000.f * ortho->orthographic_scale          / 2;
+            float w = 1000.f * ortho_settings.scale * aspect / 2;
+            float h = 1000.f * ortho_settings.scale          / 2;
             guOrtho(mtx, -w, w, -h, h, -30000, 30000, 1.f);
             if (interpolate) {
                 fovInterpolated = (node->prevFov + node->fov) / 2.0f;
