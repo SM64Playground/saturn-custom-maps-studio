@@ -340,9 +340,12 @@ void saturn_actor_bone_do_override(Vec3s rotation) {
     );
 }
 
+Vec3f stored_struct_pos;
+
 void saturn_actor_start_recording(int index) {
     MarioActor* actor = saturn_get_actor(index);
     if (actor == nullptr) return;
+    vec3f_copy(stored_struct_pos, gMarioState->pos);
     recording_mario_actor = index;
     actor->input_recording.clear();
     actor->input_recording_frame = 0;
@@ -357,6 +360,7 @@ void saturn_actor_start_recording(int index) {
 }
 
 void saturn_actor_stop_recording() {
+    vec3f_copy(gMarioState->pos, stored_struct_pos);
     recording_mario_actor = -1;
 }
 

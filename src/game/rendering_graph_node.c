@@ -1113,6 +1113,7 @@ static int obj_is_in_view(struct GraphNodeObject *node, Mat4 matrix) {
     }
 
     if (saturn_imgui_is_orthographic()) return TRUE;
+    if (gCurrentObject->behavior == bhvMario && saturn_actor_is_recording_input()) return FALSE;
 
     geo = node->sharedChild;
 

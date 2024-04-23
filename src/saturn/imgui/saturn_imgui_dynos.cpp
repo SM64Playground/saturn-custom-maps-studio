@@ -338,6 +338,7 @@ void sdynos_imgui_menu(int index) {
         bool empty = actor->input_recording.empty();
         if (empty) ImGui::Text("No recording made");
         if (ImGui::Button("Record")) {
+            set_mario_action(gMarioState, ACT_IDLE, 0);
             saturn_actor_start_recording(index);
             ImGui::CloseCurrentPopup();
         }
@@ -355,7 +356,7 @@ void sdynos_imgui_menu(int index) {
         if (!empty && !actor->playback_input) ImGui::EndDisabled();
         saturn_keyframe_popout("k_inputrec_frame");
         if (saturn_timeline_exists(saturn_keyframe_get_mario_timeline_id("k_inputrec_frame", saturn_actor_indexof(actor)).c_str()))
-            saturn_keyframe_helper("k_inputrec_frame", &actor->input_recording_frame, actor->input_recording.size());
+            saturn_keyframe_helper("k_inputrec_frame", &actor->input_recording_frame, actor->input_recording.size() - 1);
         if (empty) ImGui::EndDisabled();
         ImGui::EndMenu();
     }
