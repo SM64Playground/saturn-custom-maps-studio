@@ -433,15 +433,15 @@ bool saturn_imgui_get_viewport(int* width, int* height) {
     if (width == nullptr) width = &w;
     if (height == nullptr) height = &h;
     if (capturing_video) {
-        *width = videores[0];
-        *height = videores[1];
+        *width = videores[0] * (video_antialias + 1) + video_antialias;
+        *height = videores[1] * (video_antialias + 1) + video_antialias;
         return true;
     }
     if (game_viewport[2] != -1 && game_viewport[3] != -1) {
         float bounds[4];
         saturn_get_game_bounds(bounds, ImVec2(game_viewport[2], game_viewport[3]));
-        *width  = bounds[2] * (configWindow.enable_antialias * ANTIALIAS_MODIFIER + 1);
-        *height = bounds[3] * (configWindow.enable_antialias * ANTIALIAS_MODIFIER + 1);
+        *width  = bounds[2];
+        *height = bounds[3];
         return true;
     }
     SDL_GetWindowSize(window, width, height);
@@ -456,31 +456,31 @@ void saturn_capture_screenshot() {
     if (!capturing_video) return;
     if (video_timer-- > 0) return;
     capturing_video = false;
-    int fb_size = (int)videores[0] * (int)videores[1] * 4;
-    unsigned char* image = (unsigned char*)malloc(fb_size);
-    unsigned char* flipped = (unsigned char*)malloc(fb_size);
+    int in_width = videores[0] * (video_antialias + 1) + video_antialias;
+    int in_height = videores[0] * (video_antialias + 1) + video_antialias;
+    int in_size = (int)in_width * (int)in_height * 4;
+    int out_size = (int)videores[0] * (int)videores[1] * 4;
+    unsigned char* image = (unsigned char*)malloc(in_size);
+    unsigned char* flipped = (unsigned char*)malloc(out_size);
     glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)framebuffer);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     glBindTexture(GL_TEXTURE_2D, 0);
     for (int y = 0; y < videores[1]; y++) {
         for (int x = 0; x < videores[0]; x++) {
-            int i = (y * videores[0] + x) * 4;
+            int i = (y * in_width + x) * 4;
             int j = ((videores[1] - y - 1) * videores[0] + x) * 4;
             int r = 0, g = 0, b = 0, a = 0;
             if (video_antialias) {
-                int pixels = 0;
-                for (int X = x - 1; X <= x + 1; X++) {
-                    for (int Y = y - 1; Y <= y + 1; Y++) {
-                        if (X < 0 || Y < 0 || X >= videores[0] || Y >= videores[1]) continue;
-                        int I = (Y * videores[0] + X) * 4;
+                for (int X = 0; X <= 2; X++) {
+                    for (int Y = 0; Y <= 2; Y++) {
+                        int I = ((Y + y * 2) * in_height + (X + x * 2)) * 4;
                         r += image[I + 0];
                         g += image[I + 1];
                         b += image[I + 2];
                         a += image[I + 3];
-                        pixels++;
                     }
                 }
-                r /= pixels; g /= pixels; b /= pixels; a /= pixels;
+                r /= 9.f; g /= 9.f; b /= 9.f; a /= 9.f;
             }
             else {
                 r = image[i + 0];

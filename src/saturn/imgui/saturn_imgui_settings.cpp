@@ -250,9 +250,6 @@ void ssettings_imgui_update() {
         }
         ImGui::PopItemWidth();
 
-        ImGui::Checkbox("Anti-aliasing", &configWindow.enable_antialias);
-        imgui_bundled_tooltip("Enables/disables anti-aliasing with OpenGL.");
-
         ImGui::Checkbox("Disable near-clipping", &configEditorNearClipping);
         imgui_bundled_tooltip("Enable when some close to the camera starts clipping through. Disable if the level fog goes nuts.");
 
