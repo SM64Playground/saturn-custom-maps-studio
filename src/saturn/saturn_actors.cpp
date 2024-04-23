@@ -136,6 +136,8 @@ void saturn_clear_actors() {
 int recording_mario_actor = -1;
 InputRecordingFrame latest_recording_frame;
 
+#define wrap(x, n) (((x) % (n) + (n)) % (n))
+
 void bhv_mario_actor_loop() {
     MarioActor* actor = saturn_get_actor(o->oMarioActorIndex);
     if (!actor) return;
@@ -181,7 +183,7 @@ void bhv_mario_actor_loop() {
             actor->animstate.length = o->header.gfx.unk38.curAnim->unk08;
         }
         o->header.gfx.unk38.animYTrans = 0xBD;
-        o->header.gfx.unk38.animFrame = actor->animstate.frame;
+        o->header.gfx.unk38.animFrame = wrap((int)actor->animstate.frame, actor->animstate.length);
     }
 }
 
