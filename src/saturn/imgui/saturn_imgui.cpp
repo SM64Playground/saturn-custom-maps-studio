@@ -1091,13 +1091,6 @@ void saturn_imgui_update() {
                 "Orthographic\0"
             )) orthographic_mode = curr_projection;
             if (orthographic_mode) {
-                if (ImGui::BeginPopup("###ortho_yaw_presets")) {
-                    if (ImGui::Selectable("45" )) ortho_settings.rotation_y = 45 ;
-                    if (ImGui::Selectable("135")) ortho_settings.rotation_y = 135;
-                    if (ImGui::Selectable("225")) ortho_settings.rotation_y = 225;
-                    if (ImGui::Selectable("315")) ortho_settings.rotation_y = 315;
-                    ImGui::EndPopup();
-                }
                 if (ImGui::BeginTable("###ortho_table", 2)) {
                     #define ORTHO_SETTING(label, variable, speed, kfid, popup) \
                         ImGui::TableNextRow(); \
@@ -1106,6 +1099,13 @@ void saturn_imgui_update() {
                         if (*popup) ImGui::OpenPopupOnItemClick(popup); \
                         ImGui::TableSetColumnIndex(1); \
                         saturn_keyframe_popout(kfid);
+                    if (ImGui::BeginPopup("###ortho_yaw_presets")) {
+                        if (ImGui::Selectable("45" )) ortho_settings.rotation_y = 45 ;
+                        if (ImGui::Selectable("135")) ortho_settings.rotation_y = 135;
+                        if (ImGui::Selectable("225")) ortho_settings.rotation_y = 225;
+                        if (ImGui::Selectable("315")) ortho_settings.rotation_y = 315;
+                        ImGui::EndPopup();
+                    }
                     ORTHO_SETTING("Scale", scale, 0.02f, "k_orthoscale", "");
                     ORTHO_SETTING("Yaw", rotation_y, 1.0f, "k_orthoyaw", "###ortho_yaw_presets");
                     ORTHO_SETTING("Pitch", rotation_x, 1.0f, "k_orthopitch", "");
