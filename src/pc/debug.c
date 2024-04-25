@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdint.h>
 
@@ -73,7 +74,6 @@ void close_logger() {
 #include <crtdbg.h>
 #include "dbghelp.h"
 #else
-#define __USE_GNU
 #include <signal.h>
 #include <execinfo.h>
 #include <ucontext.h>

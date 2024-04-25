@@ -762,7 +762,7 @@ ifeq ($(WINDOWS_BUILD),1)
       LDFLAGS += $(BUILD_DIR)/res/icon.o
     endif
   endif
-  LDFLAGS += -ldbghelp 
+  LDFLAGS += -ldl
 else
   LDFLAGS += -rdynamic
 endif
