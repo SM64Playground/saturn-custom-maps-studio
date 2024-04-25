@@ -77,8 +77,8 @@ void close_logger() {
 #include <signal.h>
 #include <execinfo.h>
 #include <ucontext.h>
-#include <dlfcn.h>
 #endif
+#include <dlfcn.h>
 
 #ifdef _WIN32
 struct {
@@ -198,7 +198,6 @@ static void crash_handler(int signal, siginfo_t* info, ucontext_t* context)
     }
 #ifdef _WIN32
     void* stacktrace[256];
-    SymInitialize(GetCurrentProcess(), NULL, TRUE);
     USHORT num_frames;
     num_frames = CaptureStackBackTrace(0, 256, stacktrace, NULL);
     if (num_frames > 0)
@@ -211,24 +210,13 @@ static void crash_handler(int signal, siginfo_t* info, ucontext_t* context)
         printf("Backtrace:");
         for (int i = 0; i < num_frames; i++) {
             printf("\n#%-3d ", i);
-#ifdef _WIN32
-            SYMBOL_INFO symbol;
-            symbol.SizeOfStruct = sizeof(SYMBOL_INFO);
-            symbol.MaxNameLen = MAX_SYM_NAME;
-            DWORD64 displacement = 0;
-            if (SymFromAddr(GetCurrentProcess(), (DWORD64)stacktrace[i], &displacement, &symbol)) {
-                printf("%s", symbol.Name);
-                if (displacement != 0) printf(" + 0x%lX", displacement);
-            }
-#else
             Dl_info info;
             if (dladdr(stacktrace[i], &info) && info.dli_sname) {
                 printf("%s", info.dli_sname);
                 if (info.dli_saddr != 0) printf(" + 0x%lX", stacktrace[i] - info.dli_saddr);
             }
-#endif
             else {
-                printf("??? [%p]", stacktrace[i]);
+                printf("??? [0x%p]", stacktrace[i]);
             }
         }
         printf("\n");
@@ -236,9 +224,6 @@ static void crash_handler(int signal, siginfo_t* info, ucontext_t* context)
     else {
         printf("Unable to get stack trace\n");
     }
-#ifdef _WIN32
-    SymCleanup(GetCurrentProcess());
-#endif
     close_logger();
     exit(1);
     return;
