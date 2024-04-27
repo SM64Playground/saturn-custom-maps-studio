@@ -1049,6 +1049,7 @@ bool saturn_begin_extract_rom_thread() {
         extract_return_code = saturn_extract_rom(EXTRACT_TYPE_ALL);
         extraction_finished = true;
     });
+    extract_thread.detach();
     return false;
 }
 
@@ -1071,6 +1072,7 @@ bool saturn_do_load() {
         saturn_launch_timer = 0;
         loading_finished = true;
     });
+    load_thread.detach();
     return false;
 }
 
