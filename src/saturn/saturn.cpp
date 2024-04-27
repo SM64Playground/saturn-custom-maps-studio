@@ -1030,6 +1030,9 @@ const char* saturn_get_stage_name(int courseNum) {
         case LEVEL_WMOTR: return "Wing Mario Over the Rainbow"; break;
         case LEVEL_RR: return "Rainbow Ride"; break;
         case LEVEL_BITS: return "Bowser in the Sky"; break;
+        case LEVEL_BOWSER_1: return "Bowser 1"; break;
+        case LEVEL_BOWSER_2: return "Bowser 2"; break;
+        case LEVEL_BOWSER_3: return "Bowser 3"; break;
 
         default: return "Unknown"; break;
     }
