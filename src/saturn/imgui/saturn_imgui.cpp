@@ -538,8 +538,32 @@ void saturn_imgui_set_frame_buffer(void* fb, bool do_capture) {
 // Set up ImGui
 
 bool imgui_config_exists = false;
+std::map<std::string, bool> visible_windows = {};
 
-ImGuiID saturn_imgui_setup_dockspace() {
+void saturn_imgui_create_dockspace_layout(ImGuiID dockspace) {
+    if (visible_windows.empty()) {
+        visible_windows.insert({ "Machinima", true });
+        visible_windows.insert({ "Marios", true });
+        visible_windows.insert({ "Settings", true });
+        visible_windows.insert({ "Game", true });
+        visible_windows.insert({ "Timeline###kf_timeline", true });
+    }
+    if (imgui_config_exists) return;
+    imgui_config_exists = true;
+    ImGuiID left, right, up, down;
+    ImGui::DockBuilderRemoveNode(dockspace);
+    ImGui::DockBuilderAddNode(dockspace, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
+    ImGui::DockBuilderSetNodeSize(dockspace, ImGui::GetWindowViewport()->Size);
+    ImGui::DockBuilderSplitNode(dockspace, ImGuiDir_Up, 0.7f, &up, &down);
+    ImGui::DockBuilderSplitNode(up, ImGuiDir_Left, 0.25f, &left, &right);
+    ImGui::DockBuilderDockWindow("Machinima", left);
+    ImGui::DockBuilderDockWindow("Marios", left);
+    ImGui::DockBuilderDockWindow("Settings", left);
+    ImGui::DockBuilderDockWindow("Game", right);
+    ImGui::DockBuilderDockWindow("Timeline###kf_timeline", down);
+}
+
+void saturn_imgui_setup_dockspace() {
     ImGuiViewport* viewport = ImGui::GetWindowViewport();
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(viewport->Size);
@@ -557,24 +581,20 @@ ImGuiID saturn_imgui_setup_dockspace() {
     ImGui::PopStyleVar();
     ImGuiID dockspace = ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::End();
-    return dockspace;
+    saturn_imgui_create_dockspace_layout(dockspace);
 }
 
-void saturn_imgui_create_dockspace_layout(ImGuiID dockspace) {
-    if (imgui_config_exists) return;
-    imgui_config_exists = true;
-    ImGuiID left, right, up, down;
-    ImGui::DockBuilderRemoveNode(dockspace);
-    ImGui::DockBuilderAddNode(dockspace, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
-    ImGui::DockBuilderSetNodeSize(dockspace, ImGui::GetWindowViewport()->Size);
-    ImGui::DockBuilderSplitNode(dockspace, ImGuiDir_Up, 0.7f, &up, &down);
-    ImGui::DockBuilderSplitNode(up, ImGuiDir_Left, 0.25f, &left, &right);
-    ImGui::DockBuilderDockWindow("Machinima", left);
-    ImGui::DockBuilderDockWindow("Marios", left);
-    ImGui::DockBuilderDockWindow("Isometric", left);
-    ImGui::DockBuilderDockWindow("Settings", left);
-    ImGui::DockBuilderDockWindow("Game", right);
-    ImGui::DockBuilderDockWindow("Timeline###kf_timeline", down);
+bool saturn_imgui_window(const char* title, ImGuiWindowFlags extra_flags = ImGuiWindowFlags_None) {
+    if (visible_windows.find(title) == visible_windows.end()) {
+        std::cout << "! Window " << title << " not registered" << std::endl;
+        return false;
+    }
+    if (!visible_windows[title]) return false;
+    if (ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoCollapse | extra_flags)) return true;
+    else {
+        ImGui::End();
+        return false;
+    }
 }
 
 void saturn_imgui_init_backend(SDL_Window * sdl_window, SDL_GLContext ctx) {
@@ -739,8 +759,8 @@ int endFrame = 0;
 int endFrameText = 0;
 
 void saturn_keyframe_window() {
-    std::string windowLabel = "Timeline###kf_timeline";
-    ImGui::Begin(windowLabel.c_str(), nullptr, ImGuiWindowFlags_NoScrollWithMouse);
+    const char* windowLabel = "Timeline###kf_timeline";
+    ImGui::Begin(windowLabel, nullptr, ImGuiWindowFlags_NoScrollWithMouse);
     if (ImGui::BeginPopupContextItem("Keyframe Menu Popup")) {
         k_context_popout_open = false;
         vector<Keyframe>* keyframes = &k_frame_keys[k_context_popout_keyframe.timelineID].second;
@@ -880,7 +900,7 @@ void saturn_keyframe_window() {
 
     // Auto focus (use controls without clicking window first)
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_None) && saturn_disable_sm64_input()) {
-        ImGui::SetWindowFocus(windowLabel.c_str());
+        ImGui::SetWindowFocus(windowLabel);
     }
 
     k_popout_focused = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
@@ -918,10 +938,11 @@ void saturn_imgui_update() {
 
     camera_savestate_mult = 1.f;
 
-    ImGuiID dockspace = saturn_imgui_setup_dockspace();
+   saturn_imgui_setup_dockspace();
+
     bool is_recording = saturn_actor_is_recording_input();
     if (is_recording) ImGui::BeginDisabled();
-    if (ImGui::Begin("Machinima")) {
+    if (saturn_imgui_window("Machinima")) {
         windowCcEditor = false;
 
         if (ImGui::BeginMenu("Open Project")) {
@@ -1143,9 +1164,10 @@ void saturn_imgui_update() {
                 video_renderer_init(videores[0], videores[1], sixty_fps_enabled);
             }
         }
-    } ImGui::End();
+        ImGui::End();
+    }
 
-    if (ImGui::Begin("Marios")) {
+    if (saturn_imgui_window("Marios")) {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
         if (ImGui::Selectable(ICON_FK_TRASH " Delete all Marios")) {
             saturn_clear_actors();
@@ -1230,14 +1252,16 @@ void saturn_imgui_update() {
             actor = actor->next;
             i++;
         }
-    } ImGui::End();
+        ImGui::End();
+    }
 
-    if (ImGui::Begin("Settings")) {
+    if (saturn_imgui_window("Settings")) {
         ssettings_imgui_update();
-    } ImGui::End();
+        ImGui::End();
+    }
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    if (ImGui::Begin("Game")) {
+    if (saturn_imgui_window("Game")) {
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         window_pos.y += 20;
@@ -1282,7 +1306,8 @@ void saturn_imgui_update() {
         if (mario_menu_do_open) ImGui::OpenPopup("Mario Menu");
         if (!ImGui::IsWindowHovered()) game_focus_timer = 0;
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    } ImGui::End();
+        ImGui::End();
+    }
     ImGui::PopStyleVar();
 
     saturn_keyframe_window();
@@ -1295,6 +1320,12 @@ void saturn_imgui_update() {
         if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, height, window_flags)) {
             if (ImGui::BeginMenuBar()) {
                 if (is_recording) ImGui::EndDisabled();
+                if (ImGui::BeginMenu("x")) {
+                    for (auto& window : visible_windows) {
+                        if (ImGui::MenuItem(window.first.c_str(), NULL, window.second)) window.second ^= 1;
+                    }
+                    ImGui::EndMenu();
+                }
                 ImGui::Text(PLATFORM_ICON);
                 if (configFps60) ImGui::TextDisabled("%.1f FPS (%.3f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
                 else ImGui::TextDisabled("%.1f FPS (%.3f ms/frame)", ImGui::GetIO().Framerate / 2, 1000.0f / (ImGui::GetIO().Framerate / 2));
@@ -1381,8 +1412,6 @@ void saturn_imgui_update() {
 
     //ImGui::ShowDemoWindow();
     if (is_recording) ImGui::EndDisabled();
-
-    saturn_imgui_create_dockspace_layout(dockspace);
 
     is_cc_editing = windowCcEditor & support_color_codes & current_model.ColorCodeSupport;
 
