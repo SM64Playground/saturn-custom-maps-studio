@@ -29,6 +29,7 @@
 #include "icons/IconsForkAwesome.h"
 #include "icons/IconsFontAwesome5.h"
 #include "saturn/filesystem/saturn_projectfile.h"
+#include "saturn/filesystem/saturn_windowfile.h"
 #include "saturn/saturn_json.h"
 #include "saturn/saturn_video_renderer.h"
 
@@ -547,6 +548,7 @@ void saturn_imgui_create_dockspace_layout(ImGuiID dockspace) {
         visible_windows.insert({ "Settings", true });
         visible_windows.insert({ "Game", true });
         visible_windows.insert({ "Timeline###kf_timeline", true });
+        saturn_load_window_visibility("windows.bin", &visible_windows);
     }
     if (imgui_config_exists) return;
     imgui_config_exists = true;
@@ -760,7 +762,7 @@ int endFrameText = 0;
 
 void saturn_keyframe_window() {
     const char* windowLabel = "Timeline###kf_timeline";
-    ImGui::Begin(windowLabel, nullptr, ImGuiWindowFlags_NoScrollWithMouse);
+    if (!saturn_imgui_window(windowLabel, ImGuiWindowFlags_NoScrollWithMouse)) return;
     if (ImGui::BeginPopupContextItem("Keyframe Menu Popup")) {
         k_context_popout_open = false;
         vector<Keyframe>* keyframes = &k_frame_keys[k_context_popout_keyframe.timelineID].second;
@@ -1322,7 +1324,10 @@ void saturn_imgui_update() {
                 if (is_recording) ImGui::EndDisabled();
                 if (ImGui::BeginMenu("x")) {
                     for (auto& window : visible_windows) {
-                        if (ImGui::MenuItem(window.first.c_str(), NULL, window.second)) window.second ^= 1;
+                        if (ImGui::MenuItem(window.first.c_str(), NULL, window.second)) {
+                            window.second ^= 1;
+                            saturn_save_window_visibility("windows.bin", &visible_windows);
+                        }
                     }
                     ImGui::EndMenu();
                 }
