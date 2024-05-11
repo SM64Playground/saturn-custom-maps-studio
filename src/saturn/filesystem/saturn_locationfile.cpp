@@ -29,47 +29,45 @@ void saturn_add_defined_location(int level, float x, float y, float z, s16 angle
         }
     }
 }
+bool saturn_location_handler(SaturnFormatStream* stream, int version) {
+    int level = saturn_format_read_int16(stream);
+    s16 angle = saturn_format_read_int16(stream);
+    float x = saturn_format_read_float(stream);
+    float y = saturn_format_read_float(stream);
+    float z = saturn_format_read_float(stream);
+    char name[256];
+    saturn_format_read_string(stream, name, 256);
+    name[255] = 0;
+    saturn_add_defined_location(level, x, y, z, angle, name);
+    return true;
+}
 bool saturn_location_data_handler(SaturnFormatStream* stream, int version) {
     int count = saturn_format_read_int32(stream);
     for (int i = 0; i < count; i++) {
-        int level = saturn_format_read_int16(stream);
-        s16 angle = saturn_format_read_int16(stream);
-        float x = saturn_format_read_float(stream);
-        float y = saturn_format_read_float(stream);
-        float z = saturn_format_read_float(stream);
-        char name[256];
-        saturn_format_read_string(stream, name, 256);
-        name[255] = 0;
-        saturn_add_defined_location(level, x, y, z, angle, name);
+        saturn_location_handler(stream, version);
     }
     return true;
 }
 void saturn_load_locations() {
     saturn_format_input("dynos/locations.bin", "STLC", {
-        { "DATA", saturn_location_data_handler }
+        { "DATA", saturn_location_data_handler }, // legacy format
+        { "LCTN", saturn_location_handler }
     });
 }
 void saturn_save_locations() {
-    SaturnFormatStream stream = saturn_format_output("STLC", 1);
-    saturn_format_new_section(&stream, "DATA");
-    int count = 0;
+    SaturnFormatStream stream = saturn_format_output("STLC", 2);
     for (auto& levelEntry : locations) {
         for (auto& locationEntry : levelEntry.second) {
-            count++;
-        }
-    }
-    saturn_format_write_int32(&stream, count);
-    for (auto& levelEntry : locations) {
-        for (auto& locationEntry : levelEntry.second) {
+            saturn_format_new_section(&stream, "LCTN");
             saturn_format_write_int16(&stream, levelEntry.first);
             saturn_format_write_int16(&stream, locationEntry.second.first);
             saturn_format_write_float(&stream, locationEntry.second.second[0]);
             saturn_format_write_float(&stream, locationEntry.second.second[1]);
             saturn_format_write_float(&stream, locationEntry.second.second[2]);
             saturn_format_write_string(&stream, (char*)locationEntry.first.c_str());
+            saturn_format_close_section(&stream);
         }
     }
-    saturn_format_close_section(&stream);
     saturn_format_write("dynos/locations.bin", &stream);
 }
 std::map<std::string, std::pair<s16, std::array<float, 3>>>* saturn_get_locations() {
