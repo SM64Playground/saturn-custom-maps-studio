@@ -739,6 +739,11 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
     saturn_keyframe_popout_next_line("k_mario_anim");
     if (saturn_timeline_exists(saturn_keyframe_get_mario_timeline_id("k_mario_anim_frame", saturn_actor_indexof(actor)).c_str()))
         saturn_keyframe_helper("k_mario_anim_frame", &actor->animstate.frame, actor->animstate.length);
+    ImGui::PushItemWidth(100);
+    ImGui::DragInt("Y Translation", &actor->animstate.yTransform, 1.0f, -32768, 32767, "%d\n", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    imgui_bundled_help_marker("Recommended to keep at default value (189) for Mario's animations; 0 for everything else");
 }
 
 /*void imgui_machinima_animation_player() {

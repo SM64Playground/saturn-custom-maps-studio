@@ -50,6 +50,7 @@ struct AnimationState {
     int length;
     int customanim_numindices;
     bool customanim_extra;
+    int yTransform;
 #ifdef __cplusplus
     std::vector<s16> customanim_indices;
     std::vector<s16> customanim_values;

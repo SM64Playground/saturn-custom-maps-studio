@@ -39,6 +39,7 @@ MarioActor* saturn_spawn_actor(float x, float y, float z) {
     actor.animstate.custom = false;
     actor.animstate.id = MARIO_ANIM_A_POSE;
     actor.animstate.frame = 0;
+    actor.animstate.yTransform = 0xBD;
     return saturn_add_actor(actor);
 }
 
@@ -157,7 +158,7 @@ void bhv_mario_actor_loop() {
         o->header.gfx.unk38.animID = frame.animID;
         o->header.gfx.unk38.curAnim = &actor->anim;
         o->header.gfx.unk38.curAnim->flags = 4; // prevent the anim to get a mind on its own
-        o->header.gfx.unk38.animYTrans = 0xBD;
+        o->header.gfx.unk38.animYTrans = actor->animstate.yTransform;
         o->header.gfx.unk38.animFrame = frame.animFrame;
     }
     else {
@@ -184,7 +185,7 @@ void bhv_mario_actor_loop() {
             o->header.gfx.unk38.curAnim->flags = 4; // prevent the anim to get a mind on its own
             actor->animstate.length = o->header.gfx.unk38.curAnim->unk08;
         }
-        o->header.gfx.unk38.animYTrans = 0xBD;
+        o->header.gfx.unk38.animYTrans = actor->animstate.yTransform;
         o->header.gfx.unk38.animFrame = wrap((int)actor->animstate.frame, actor->animstate.length);
     }
 }
