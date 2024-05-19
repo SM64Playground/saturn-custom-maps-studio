@@ -27,7 +27,7 @@ void pad(SaturnFormatStream* stream) {
         saturn_format_write_int8(stream, 255);
     }
 }
-void saturn_format_input(char* filename, char* id, std::map<std::string, SaturnFormatSectionHandler> handlers) {
+void saturn_format_input(const char* filename, const char* id, std::map<std::string, SaturnFormatSectionHandler> handlers) {
     std::ifstream file = std::ifstream(filename, std::ios::binary);
     if (!file.good()) return;
     char* header = (char*)malloc(SATURN_FORMAT_BLOCK_SIZE);
@@ -66,7 +66,7 @@ void saturn_format_input(char* filename, char* id, std::map<std::string, SaturnF
     free(content);
     file.close();
 }
-SaturnFormatStream saturn_format_output(char* identifier, int version) {
+SaturnFormatStream saturn_format_output(const char* identifier, int version) {
     char* content = (char*)malloc(SATURN_FORMAT_MAX_CONTENT_SIZE);
     SaturnFormatStream stream;
     stream.data = content;
@@ -156,7 +156,7 @@ void saturn_format_write_float(SaturnFormatStream* stream, float value) {
 void saturn_format_write_bool(SaturnFormatStream* stream, bool value) {
     saturn_format_write_int8(stream, value ? 1 : 0);
 }
-void saturn_format_write_string(SaturnFormatStream* stream, char* value) {
+void saturn_format_write_string(SaturnFormatStream* stream, const char* value) {
     int i = -1;
     do {
         i++;
@@ -164,11 +164,11 @@ void saturn_format_write_string(SaturnFormatStream* stream, char* value) {
     }
     while (value[i] != '\0');
 }
-void saturn_format_write_any(SaturnFormatStream* stream, void* value, int length) {
+void saturn_format_write_any(SaturnFormatStream* stream, const void* value, int length) {
     memcpy(stream->data + stream->pointer, value, length);
     stream->pointer += length;
 }
-void saturn_format_write(char* filename, SaturnFormatStream* stream) {
+void saturn_format_write(const char* filename, SaturnFormatStream* stream) {
     std::ofstream file = std::ofstream(filename, std::ios::binary);
     pad(stream);
     saturn_format_write_any(stream, (char*)SATURN_FORMAT_FINISH_IDENTIFIER, SATURN_FORMAT_IDENTIFIER_LENGTH);

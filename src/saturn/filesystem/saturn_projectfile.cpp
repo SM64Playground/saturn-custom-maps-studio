@@ -25,7 +25,7 @@ extern "C" {
 
 #include "saturn/saturn_timelines.h"
 
-#define SATURN_PROJECT_VERSION 3
+#define SATURN_PROJECT_VERSION 4
 
 std::string current_project = "";
 int project_load_timer = 0;
@@ -163,7 +163,7 @@ bool saturn_project_mario_actor_handler(SaturnFormatStream* stream, int version)
     else
         actor->scaler[0][0] = actor->scaler[0][1] = actor->scaler[0][2] =
         actor->scaler[1][0] = actor->scaler[1][1] = actor->scaler[1][2] =
-        actor->scaler[2][0] = actor->scaler[2][1] = actor->scaler[2][2] = 0;
+        actor->scaler[2][0] = actor->scaler[2][1] = actor->scaler[2][2] = 1;
     actor->head_rot_x = saturn_format_read_int32(stream);
     actor->head_rot_y = saturn_format_read_int32(stream);
     actor->eye_state = saturn_format_read_int32(stream);
@@ -183,6 +183,7 @@ bool saturn_project_mario_actor_handler(SaturnFormatStream* stream, int version)
     actor->animstate.custom = saturn_format_read_bool(stream);
     actor->animstate.frame = saturn_format_read_int32(stream);
     actor->animstate.id = saturn_format_read_int32(stream);
+    if (version >= 4) actor->animstate.yTransform = (s16)saturn_format_read_int16(stream);
     actor->selected_model = saturn_format_read_bool(stream) - 1;
     for (int cc = 0; cc < 12; cc++) {
         for (int shade = 0; shade < 2; shade++) {
@@ -419,6 +420,7 @@ void saturn_save_project(char* filename) {
         saturn_format_write_bool(stream, actor->animstate.custom);
         saturn_format_write_int32(stream, actor->animstate.frame);
         saturn_format_write_int32(stream, actor->animstate.id);
+        saturn_format_write_int16(stream, actor->animstate.yTransform);
         saturn_format_write_bool(stream, actor->selected_model != -1);
         for (int cc = 0; cc < 12; cc++) {
             for (int shade = 0; shade < 2; shade++) {
