@@ -8,6 +8,7 @@
 #include <thread>
 #include <map>
 #include <SDL2/SDL.h>
+#include "saturn/saturn_animation_ids.h"
 
 #include "PR/os_cont.h"
 #include "data/dynos.cpp.h"
@@ -630,7 +631,7 @@ void saturn_update() {
             vec3f_get_dist_and_angle(hit, gCamera->pos, &dist, &pitch, &yaw);
             MarioActor* actor = saturn_spawn_actor(hit[0], hit[1], hit[2]);
             actor->angle = yaw;
-            std::string name = "Unnamed Mario " + std::to_string(++marios_spawned);
+            std::string name = "Unnamed " + saturn_object_names[current_mario_model] + " " + std::to_string(++marios_spawned);
             memcpy(actor->name, name.c_str(), name.length() + 1);
         }
         if (mouse_state.released & MOUSEBTN_MASK_R) {

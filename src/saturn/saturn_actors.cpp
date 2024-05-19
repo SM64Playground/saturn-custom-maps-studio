@@ -3,6 +3,7 @@
 #include "game/object_helpers.h"
 #include "mario_animation_ids.h"
 #include "saturn/saturn.h"
+#include "saturn/saturn_animation_ids.h"
 #include "saturn/saturn_colors.h"
 #include "saturn/saturn_models.h"
 #include "sm64.h"
@@ -19,6 +20,7 @@ extern "C" {
 #define o gCurrentObject
 
 MarioActor* gMarioActorList = nullptr;
+ModelID current_mario_model = MODEL_MARIO;
 
 void delete_mario_actor_timelines(int index) {
     std::vector<std::string> ids = {};
@@ -37,9 +39,12 @@ MarioActor* saturn_spawn_actor(float x, float y, float z) {
     actor.y = y;
     actor.z = z;
     actor.animstate.custom = false;
-    actor.animstate.id = MARIO_ANIM_A_POSE;
+    actor.animstate.id = current_mario_model == MODEL_MARIO ? MARIO_ANIM_A_POSE : saturn_animation_obj_ranges[current_mario_model].first;
     actor.animstate.frame = 0;
-    actor.animstate.yTransform = 0xBD;
+    actor.animstate.yTransform = current_mario_model == MODEL_MARIO ? 0xBD : 0x00;
+    actor.obj_model = current_mario_model;
+    auto anim = saturn_animation_data[saturn_animation_obj_ranges[current_mario_model].first];
+    actor.num_bones = anim.second(anim.first).unk0A;
     return saturn_add_actor(actor);
 }
 
@@ -180,7 +185,8 @@ void bhv_mario_actor_loop() {
             o->header.gfx.unk38.curAnim->length = (s16)actor->animstate.length;
         }
         else {
-            load_animation(&actor->anim, actor->animstate.id);
+            auto anim = saturn_animation_data[actor->animstate.id];
+            actor->anim = anim.second(anim.first);
             o->header.gfx.unk38.animID = actor->animstate.id;
             o->header.gfx.unk38.curAnim->flags = 4; // prevent the anim to get a mind on its own
             actor->animstate.length = o->header.gfx.unk38.curAnim->unk08;
@@ -188,6 +194,8 @@ void bhv_mario_actor_loop() {
         o->header.gfx.unk38.animYTrans = actor->animstate.yTransform;
         o->header.gfx.unk38.animFrame = wrap((int)actor->animstate.frame, actor->animstate.length);
     }
+    o->oOpacity = 0xFF;
+    cur_obj_set_model(actor->obj_model);
 }
 
 ColorCode default_cc;

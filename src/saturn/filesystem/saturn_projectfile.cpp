@@ -185,6 +185,8 @@ bool saturn_project_mario_actor_handler(SaturnFormatStream* stream, int version)
     actor->animstate.id = saturn_format_read_int32(stream);
     if (version >= 4) actor->animstate.yTransform = (s16)saturn_format_read_int16(stream);
     actor->selected_model = saturn_format_read_bool(stream) - 1;
+    if (version >= 4) actor->obj_model = (ModelID)saturn_format_read_int16(stream);
+    else actor->obj_model = MODEL_MARIO;
     for (int cc = 0; cc < 12; cc++) {
         for (int shade = 0; shade < 2; shade++) {
             actor->colorcode[cc].red  [shade] = saturn_format_read_int8(stream);
@@ -216,7 +218,9 @@ bool saturn_project_mario_actor_handler(SaturnFormatStream* stream, int version)
             }
         }
     }
-    for (int i = 0; i < 20; i++) {
+    if (version >= 4) actor->num_bones = saturn_format_read_int8(stream);
+    else actor->num_bones = 20;
+    for (int i = 0; i < actor->num_bones; i++) {
         actor->bones[i][0] = saturn_format_read_float(stream);
         actor->bones[i][1] = saturn_format_read_float(stream);
         actor->bones[i][2] = saturn_format_read_float(stream);
@@ -422,6 +426,7 @@ void saturn_save_project(char* filename) {
         saturn_format_write_int32(stream, actor->animstate.id);
         saturn_format_write_int16(stream, actor->animstate.yTransform);
         saturn_format_write_bool(stream, actor->selected_model != -1);
+        saturn_format_write_int16(stream, actor->obj_model);
         for (int cc = 0; cc < 12; cc++) {
             for (int shade = 0; shade < 2; shade++) {
                 saturn_format_write_int8(stream, actor->colorcode[cc].red  [shade]);
@@ -434,7 +439,8 @@ void saturn_save_project(char* filename) {
             std::filesystem::path base = actor->model.Expressions[i].FolderPath;
             saturn_format_write_string(stream, (char*)std::filesystem::relative(path, base).string().c_str());
         }
-        for (int i = 0; i < 20; i++) {
+        saturn_format_write_int8(stream, actor->num_bones);
+        for (int i = 0; i < actor->num_bones; i++) {
             saturn_format_write_float(stream, actor->bones[i][0]);
             saturn_format_write_float(stream, actor->bones[i][1]);
             saturn_format_write_float(stream, actor->bones[i][2]);

@@ -55,7 +55,6 @@ int custom_anim_index = -1;
 int current_sanim_index = 7;
 std::string current_sanim_name = "RUNNING";
 int current_sanim_id = MARIO_ANIM_RUNNING;
-std::map<std::pair<int, std::string>, int> current_anim_map = sanim_movement;
 std::string anim_preview_name = "RUNNING";
 int current_sanim_group_index = 0;
 int current_slevel_index = 1;
@@ -549,7 +548,6 @@ void imgui_machinima_quick_options() {
 }
 
 static char animSearchTerm[128];
-static bool selected_groups[8] = { true, true, true, true, true, true, true, true };
 
 bool case_insensitive_contains(std::string base, std::string substr) {
     std::string lower_b = base;
@@ -561,17 +559,14 @@ bool case_insensitive_contains(std::string base, std::string substr) {
     return lower_b.find(lower_s) != std::string::npos;
 }
 
-std::vector<int> get_sorted_anim_list() {
+std::vector<int> get_sorted_anim_list(MarioActor* actor) {
     std::vector<int> anim_list = {};
     std::vector<int> fav_anim_list = {};
-    for (int i = 0; i < 8; i++) {
-        if (!selected_groups[i]) continue;
-        for (const auto& entry : sanim_maps[i]) {
-            if (!case_insensitive_contains(entry.first.second, animSearchTerm)) continue;
-            bool contains = std::find(favorite_anims.begin(), favorite_anims.end(), entry.second) != favorite_anims.end();
-            if (contains) fav_anim_list.push_back(entry.second);
-            else anim_list.push_back(entry.second);
-        }
+    for (int i = saturn_animation_obj_ranges[actor->obj_model].first; i < saturn_animation_obj_ranges[actor->obj_model].second; i++) {
+        if (!case_insensitive_contains(saturn_animation_names[i], animSearchTerm)) continue;
+        bool contains = std::find(favorite_anims.begin(), favorite_anims.end(), i) != favorite_anims.end();
+        if (contains) fav_anim_list.push_back(i);
+        else anim_list.push_back(i);
     }
     std::reverse(fav_anim_list.begin(), fav_anim_list.end());
     for (int fav : fav_anim_list) {
@@ -593,7 +588,7 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
             ImGui::PushItemWidth(316);
             ImGui::InputTextWithHint("###anim_search", ICON_FK_SEARCH " Search...", animSearchTerm, 128);
             if (ImGui::BeginChild("###anim_box_child", ImVec2(316, 100), true)) {
-                std::vector<int> anim_order = get_sorted_anim_list();
+                std::vector<int> anim_order = get_sorted_anim_list(actor);
                 for (int i : anim_order) {
                     const bool is_selected = i == actor->animstate.id && !actor->animstate.custom;
                     auto position = std::find(favorite_anims.begin(), favorite_anims.end(), i);
@@ -604,10 +599,11 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                         saturn_save_favorite_anims();
                     }
                     ImGui::SameLine();
-                    if (ImGui::Selectable(saturn_animations_list[i], is_selected)) {
+                    if (ImGui::Selectable(saturn_animation_names[i].c_str(), is_selected)) {
                         if (sampling) {
+                            auto anim = saturn_animation_data[i];
                             sampling_anim_loaded = true;
-                            load_animation(&sampling_animation, i);
+                            sampling_animation = anim.second(anim.first);
                             sampling_frame = 0;
                         }
                         else {
@@ -620,14 +616,6 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                 ImGui::EndChild();
             }
             ImGui::PopItemWidth();
-            ImGui::Checkbox("Movement",      &selected_groups[0]); ImGui::SameLine();
-            ImGui::Checkbox("Actions",       &selected_groups[1]); ImGui::SameLine();
-            ImGui::Checkbox("Automatic",     &selected_groups[2]);
-            ImGui::Checkbox("Damage/Deaths", &selected_groups[3]); ImGui::SameLine();
-            ImGui::Checkbox("Cutscenes",     &selected_groups[4]);
-            ImGui::Checkbox("Water",         &selected_groups[5]); ImGui::SameLine();
-            ImGui::Checkbox("Climbing",      &selected_groups[6]); ImGui::SameLine();
-            ImGui::Checkbox("Object",        &selected_groups[7]);
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("MComp")) {
@@ -680,35 +668,44 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     actor->bones[i][2] = 0;
                 }
             }
-#define BONE_ENTRY(name) {                                                     \
-                ImGui::TableSetColumnIndex(0);                                  \
-                ImGui::DragFloat3(name, actor->bones[currbone++]);               \
+#define BONE_ENTRY(name) {                                                   \
+                ImGui::TableSetColumnIndex(0);                                \
+                ImGui::PushItemWidth(200);                                     \
+                ImGui::DragFloat3(name, actor->bones[currbone++]);              \
+                ImGui::PopItemWidth();                                           \
                 ImGui::TableSetColumnIndex(1);                                    \
                 saturn_keyframe_popout("k_mariobone_" + std::to_string(currbone)); \
                 ImGui::TableNextRow();                                              \
             }
             if (ImGui::BeginTable("Bone Editor", 2)) {
                 ImGui::TableNextRow();
-                BONE_ENTRY("Root"           );
-                BONE_ENTRY("Body"           );
-                BONE_ENTRY("Torso"          );
-                BONE_ENTRY("Head"           );
-                BONE_ENTRY("Left Arm"       );
-                BONE_ENTRY("Upper Left Arm" );
-                BONE_ENTRY("Lower Left Arm" );
-                BONE_ENTRY("Left Hand"      );
-                BONE_ENTRY("Right Arm"      );
-                BONE_ENTRY("Upper Right Arm");
-                BONE_ENTRY("Lower Right Arm");
-                BONE_ENTRY("Right Hand"     );
-                BONE_ENTRY("Left Leg"       );
-                BONE_ENTRY("Upper Left Leg" );
-                BONE_ENTRY("Lower Left Leg" );
-                BONE_ENTRY("Left Foot"      );
-                BONE_ENTRY("Right Leg"      );
-                BONE_ENTRY("Upper Right Leg");
-                BONE_ENTRY("Lower Right Leg");
-                BONE_ENTRY("Right Foot"     );
+                if (actor->obj_model == MODEL_MARIO) {
+                    BONE_ENTRY("Root"           );
+                    BONE_ENTRY("Body"           );
+                    BONE_ENTRY("Torso"          );
+                    BONE_ENTRY("Head"           );
+                    BONE_ENTRY("Left Arm"       );
+                    BONE_ENTRY("Upper Left Arm" );
+                    BONE_ENTRY("Lower Left Arm" );
+                    BONE_ENTRY("Left Hand"      );
+                    BONE_ENTRY("Right Arm"      );
+                    BONE_ENTRY("Upper Right Arm");
+                    BONE_ENTRY("Lower Right Arm");
+                    BONE_ENTRY("Right Hand"     );
+                    BONE_ENTRY("Left Leg"       );
+                    BONE_ENTRY("Upper Left Leg" );
+                    BONE_ENTRY("Lower Left Leg" );
+                    BONE_ENTRY("Left Foot"      );
+                    BONE_ENTRY("Right Leg"      );
+                    BONE_ENTRY("Upper Right Leg");
+                    BONE_ENTRY("Lower Right Leg");
+                    BONE_ENTRY("Right Foot"     );
+                }
+                else {
+                    for (int i = 0; i < actor->num_bones; i++) {
+                        BONE_ENTRY(i == 0 ? "Root" : ("Bone " + std::to_string(i)).c_str());
+                    }
+                }
                 ImGui::EndTable();
             }
 #undef BONE_ENTRY
@@ -719,7 +716,7 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
     if (actor->custom_bone && !sampling) return;
     ImGui::Separator();
     if (sampling) {
-        if (!ImGui::SliderFloat("Frame", &sampling_frame, 0, sampling_animation.unk08, "%.0f")) return;
+        if (!ImGui::SliderFloat("Frame", &sampling_frame, 0, sampling_animation.unk08 - 1, "%.0f")) return;
         if (!sampling_anim_loaded) return;
         const u16* curindex = sampling_animation.index;
         curindex += 6;
@@ -734,11 +731,11 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
         }
         return;
     }
-    ImGui::SliderFloat("Frame", &actor->animstate.frame, 0, actor->animstate.length, "%.0f");
+    ImGui::SliderFloat("Frame", &actor->animstate.frame, 0, actor->animstate.length - 1, "%.0f");
     saturn_keyframe_popout("k_mario_anim_frame");
     saturn_keyframe_popout_next_line("k_mario_anim");
     if (saturn_timeline_exists(saturn_keyframe_get_mario_timeline_id("k_mario_anim_frame", saturn_actor_indexof(actor)).c_str()))
-        saturn_keyframe_helper("k_mario_anim_frame", &actor->animstate.frame, actor->animstate.length);
+        saturn_keyframe_helper("k_mario_anim_frame", &actor->animstate.frame, actor->animstate.length - 1);
     ImGui::PushItemWidth(100);
     ImGui::DragInt("Y Translation", &actor->animstate.yTransform, 1.0f, -32768, 32767, "%d\n", ImGuiSliderFlags_AlwaysClamp);
     ImGui::PopItemWidth();

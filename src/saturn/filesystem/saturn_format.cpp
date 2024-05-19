@@ -114,7 +114,7 @@ void saturn_format_read_any(SaturnFormatStream* stream, void* dest, int length) 
     memcpy(dest, stream->data + stream->pointer, length);
     stream->pointer += length;
 }
-void saturn_format_new_section(SaturnFormatStream* stream, char* identifier) {
+void saturn_format_new_section(SaturnFormatStream* stream, const char* identifier) {
     if (std::strcmp(identifier, SATURN_FORMAT_FINISH_IDENTIFIER) == 0) {
         std::cout << "Trying to create section with reserved identifier: " << identifier << std::endl;
         return;

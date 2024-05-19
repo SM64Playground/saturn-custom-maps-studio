@@ -23,6 +23,7 @@
 #include "saturn/saturn_actors.h"
 #include "saturn/saturn_colors.h"
 #include "saturn/saturn_textures.h"
+#include "saturn/saturn_animation_ids.h"
 #include "saturn/discord/saturn_discord.h"
 #include "pc/controller/controller_keyboard.h"
 #include "data/dynos.cpp.h"
@@ -1234,6 +1235,15 @@ void saturn_imgui_update() {
             ImGui::EndMenu();
         }
         imgui_bundled_tooltip("This Mario is used for calculations in enemy\nbehaviors and is not visible in renders.");
+        ImGui::PushItemWidth(200);
+        if (ImGui::BeginCombo("Model", saturn_object_names[current_mario_model].c_str())) {
+            for (auto model_entry : saturn_object_names) {
+                bool selected = model_entry.first == current_mario_model;
+                if (ImGui::Selectable(model_entry.second.c_str(), selected)) current_mario_model = (ModelID)model_entry.first;
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::PopItemWidth();
         ImGui::Separator();
         ImGui::InputTextWithHint("###mariosearch", ICON_FK_SEARCH " Search...", mario_search_prompt, 256);
         MarioActor* actor = gMarioActorList;
@@ -1479,7 +1489,7 @@ void saturn_keyframe_show_kf_content(Keyframe keyframe) {
         bool anim_custom = keyframe.value[0] >= 1;
         int anim_id = keyframe.value[1];
         if (anim_custom) anim_name = canim_array[anim_id];
-        else anim_name = saturn_animations_list[anim_id];
+        else anim_name = saturn_animation_names[anim_id];
         ImGui::Text(anim_name.c_str());
     }
     if (timeline.type == KFTYPE_EXPRESSION) {
@@ -1593,13 +1603,22 @@ std::map<std::string, float*> keyframe_helper_values = {};
 
 void saturn_keyframe_helper(std::string id, float* value, float max) {
     if (keyframe_helper_values.find(id) == keyframe_helper_values.end()) {
-        float* data = (float*)malloc(sizeof(float) * 3);
+        float* data = (float*)malloc(sizeof(float) * 4);
         data[0] = max;
         data[1] = max - *value;
         data[2] = 1;
+        data[3] = max;
         keyframe_helper_values.insert({ id, data });
     }
     float* data = keyframe_helper_values[id];
+    if (data[3] != max) {
+        free(data);
+        keyframe_helper_values[id] = data = (float*)malloc(sizeof(float) * 4);
+        data[0] = max;
+        data[1] = max - *value;
+        data[2] = 1;
+        data[3] = max;
+    }
     ImGui::SeparatorText("Keyframe Helper");
     if (ImGui::SliderFloat("End Frame", data + 0, 0, max         ) |
         ImGui::SliderFloat("Duration" , data + 1, 0, max - *value) )

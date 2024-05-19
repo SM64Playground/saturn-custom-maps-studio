@@ -55,8 +55,10 @@ public:
     bool custom_bone = false;
     int custom_bone_iter = 0;
     Vec3f scaler[3];
-    Vec3f bones[20];
+    int num_bones = 20;
+    Vec3f bones[60];
     Model model = Model();
+    ModelID obj_model;
     ColorCode colorcode;
     struct Animation anim;
     struct AnimationState animstate;
@@ -81,6 +83,7 @@ public:
 };
 
 extern MarioActor* gMarioActorList;
+extern ModelID current_mario_model;
 
 extern MarioActor* saturn_spawn_actor(float x, float y, float z);
 extern MarioActor* saturn_add_actor(MarioActor& actor);

@@ -117,6 +117,7 @@ void DynOS_Gfx_Update() {
             for (struct Object *_Object = (struct Object *) _Head->header.next; _Object != _Head; _Object = (struct Object *) _Object->header.next) {
                 MarioActor* _Actor = saturn_get_actor(_Object->oMarioActorIndex);
                 if (_Actor == nullptr) continue;
+                if (_Actor->obj_model != MODEL_MARIO) continue;
 
                 const Array<PackData *> &pDynosPacks = DynOS_Gfx_GetPacks();
 

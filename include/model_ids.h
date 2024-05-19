@@ -19,7 +19,7 @@
 #define COIN_FORMATION_FLAG_ARROW     (1 << 2)
 #define COIN_FORMATION_FLAG_FLYING    (1 << 4)
 
-enum ModelIDs {
+enum ModelID {
     MODEL_NONE,
     MODEL_MARIO,
     MODEL_LUIGI,
