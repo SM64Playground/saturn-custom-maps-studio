@@ -320,7 +320,9 @@ void split_skybox(std::filesystem::path path) {
 }
 
 void split_skyboxes() {
-    for (auto entry : std::filesystem::directory_iterator(EXTRACT_PATH / "gfx" / "textures" / "skyboxes" / "full")) {
+    std::filesystem::path joined_skyboxes = EXTRACT_PATH / "gfx" / "textures" / "skyboxes" / "full";
+    std::filesystem::create_directories(joined_skyboxes);
+    for (auto entry : std::filesystem::directory_iterator(joined_skyboxes)) {
         split_skybox(entry.path());
     }
     for (auto texture_pack : std::filesystem::directory_iterator("dynos/textures")) {
