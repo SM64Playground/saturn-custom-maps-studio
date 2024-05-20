@@ -298,7 +298,7 @@ void saturn_update() {
     }
 
     if (splash_finished) saturn_launch_timer++;
-    if (gCurrLevelNum == LEVEL_SA && saturn_launch_timer <= 1 && splash_finished) {
+    if (gCurrLevelNum == LEVEL_SA && saturn_launch_timer <= 2 && splash_finished) {
         gMarioState->faceAngle[1] = 0;
         if (gCamera) { // i hate the sm64 camera system aaaaaaaaaaaaaaaaaa
             float dist = 0;
