@@ -1,3 +1,4 @@
+#include "model_ids.h"
 MODEL(MODEL_MARIO, "Mario",
     MARIO_ANIM(SLOW_LEDGE_GRAB)
     MARIO_ANIM(FALL_OVER_BACKWARDS)
@@ -193,7 +194,7 @@ MODEL(MODEL_MARIO, "Mario",
     MARIO_ANIM(SLIDEFLIP)
     MARIO_ANIM(TRIPLE_JUMP_LAND)
     MARIO_ANIM(TRIPLE_JUMP)
-    MARIO_ANIM(FIRST_PERSON)
+    INITIAL_MARIO_ANIM(FIRST_PERSON)
     MARIO_ANIM(IDLE_HEAD_LEFT)
     MARIO_ANIM(IDLE_HEAD_RIGHT)
     MARIO_ANIM(IDLE_HEAD_CENTER)
@@ -216,7 +217,7 @@ MODEL(MODEL_TOAD, "Toad",
     MODEL_ANIM("ENDING_RIGHT_WALK_OFF2", toad_seg6_anim_0600FB40)
     MODEL_ANIM("ENDING_LEFT_IDLE", toad_seg6_anim_060099F0)
     MODEL_ANIM("ENDING_RIGHT_IDLE", toad_seg6_anim_0600A0D0)
-    MODEL_ANIM("IDLE", toad_seg6_anim_06008F7C)
+    INITIAL_MODEL_ANIM("IDLE", toad_seg6_anim_06008F7C)
     MODEL_ANIM("WAVING", toad_seg6_anim_06009310)
 )
 MODEL(MODEL_PEACH, "Peach",
@@ -224,14 +225,14 @@ MODEL(MODEL_PEACH, "Peach",
     MODEL_ANIM("ENDING_WALK_OFF2", peach_seg5_anim_0500E6B4)
     MODEL_ANIM("ENDING_WALK_OFF3", peach_seg5_anim_0500ED94)
     MODEL_ANIM("ENDING_WALK_OFF4", peach_seg5_anim_0500F474)
-    MODEL_ANIM("ENDING_PART1", peach_seg5_anim_0500FE84)
+    INITIAL_MODEL_ANIM("ENDING_PART1", peach_seg5_anim_0500FE84)
     MODEL_ANIM("ENDING_PART2", peach_seg5_anim_05011050)
     MODEL_ANIM("ENDING_PART3", peach_seg5_anim_05012F40)
     MODEL_ANIM("ENDING_PART4", peach_seg5_anim_05015468)
     MODEL_ANIM("ENDING_PART5", peach_seg5_anim_05016798)
     MODEL_ANIM("ENDING_PART6", peach_seg5_anim_05018664)
     MODEL_ANIM("ENDING_PART7", peach_seg5_anim_0501B328)
-    MODEL_ANIM("12", peach_seg5_anim_0501C404)
+    MODEL_ANIM("WAVING", peach_seg5_anim_0501C404)
 )
 MODEL(MODEL_BOWSER, "Bowser",
     MODEL_ANIM("STANDING_UP", bowser_seg6_anim_060445EC)
@@ -246,7 +247,7 @@ MODEL(MODEL_BOWSER, "Bowser",
     MODEL_ANIM("SMALL_JUMP", bowser_seg6_anim_0604B8CC)
     MODEL_ANIM("ANGRY", bowser_seg6_anim_0604D184)
     MODEL_ANIM("SCREAM", bowser_seg6_anim_0604E5A0)
-    MODEL_ANIM("IDLE", bowser_seg6_anim_0604F030)
+    INITIAL_MODEL_ANIM("IDLE", bowser_seg6_anim_0604F030)
     MODEL_ANIM("WALKING", bowser_seg6_anim_0604FF4C)
     MODEL_ANIM("WALK_STOP", bowser_seg6_anim_06050530)
     MODEL_ANIM("WALK_START", bowser_seg6_anim_060514E8)
@@ -266,25 +267,245 @@ MODEL(MODEL_PENGUIN, "Penguin",
     MODEL_ANIM("WALKING", penguin_seg5_anim_05008B5C)
     MODEL_ANIM("SLIDE_START", penguin_seg5_anim_050079E4)
     MODEL_ANIM("SLIDE_END", penguin_seg5_anim_05007DCC)
-    MODEL_ANIM("IDLE", penguin_seg5_anim_050087C0)
+    INITIAL_MODEL_ANIM("IDLE", penguin_seg5_anim_050087C0)
 )
 MODEL(MODEL_YOSHI, "Yoshi",
-    MODEL_ANIM("IDLE", yoshi_seg5_anim_050233A4)
+    INITIAL_MODEL_ANIM("IDLE", yoshi_seg5_anim_050233A4)
     MODEL_ANIM("WALKING", yoshi_seg5_anim_05023E4C)
     MODEL_ANIM("JUMPING", yoshi_seg5_anim_050240E8)
 )
 MODEL(MODEL_MIPS, "Mips",
-    MODEL_ANIM("IDLE", mips_seg6_anim_06014B94)
+    INITIAL_MODEL_ANIM("IDLE", mips_seg6_anim_06014B94)
     MODEL_ANIM("RUNNING", mips_seg6_anim_060139F8)
     MODEL_ANIM("TRIPPED", mips_seg6_anim_06013248)
     MODEL_ANIM("LOOKING_BACK", mips_seg6_anim_0601561C)
     MODEL_ANIM("HELD", mips_seg6_anim_0601369C)
 )
 MODEL(MODEL_DORRIE, "Dorrie",
-    MODEL_ANIM("IDLE", dorrie_seg6_anim_0600E18C)
+    INITIAL_MODEL_ANIM("IDLE", dorrie_seg6_anim_0600E18C)
     MODEL_ANIM("SWIMMING", dorrie_seg6_anim_0600E9BC)
     MODEL_ANIM("GROUND_POUNDED", dorrie_seg6_anim_0600F620)
 )
+MODEL(MODEL_HOOT, "Hoot",
+    INITIAL_MODEL_ANIM("FLYING_SLOW", hoot_seg5_anim_050053EC)
+    MODEL_ANIM("FLYING_FAST", hoot_seg5_anim_05005750)
+)
+MODEL(MODEL_BUTTERFLY, "Butterfly",
+    INITIAL_MODEL_ANIM("FLYING_FAST", butterfly_seg3_anim_030055B0)
+    MODEL_ANIM("FLYING_SLOW", butterfly_seg3_anim_03005698)
+)
+MODEL(MODEL_FISH, "Fish",
+    INITIAL_MODEL_ANIM("SWIMMING", blue_fish_seg3_anim_0301C298)
+)
+
+#define DOOR_ANIMS \
+    INITIAL_MODEL_ANIM("IDLE", door_seg3_anim_03015208) \
+    MODEL_ANIM("OPEN_CLOSE1", door_seg3_anim_03015440) \
+    MODEL_ANIM("OPEN_CLOSE2", door_seg3_anim_03015690) \
+    MODEL_ANIM("OPEN_CLOSE3", door_seg3_anim_03015458) \
+    MODEL_ANIM("OPEN_CLOSE4", door_seg3_anim_030156A8) \
+
+MODEL(MODEL_CASTLE_CASTLE_DOOR, "Castle Door", DOOR_ANIMS)
+MODEL(MODEL_CASTLE_WOODEN_DOOR, "Wooden Door", DOOR_ANIMS)
+MODEL(MODEL_CASTLE_DOOR_0_STARS, "0-Star Door", DOOR_ANIMS)
+MODEL(MODEL_CASTLE_DOOR_1_STAR, "1-Star Door", DOOR_ANIMS)
+MODEL(MODEL_CASTLE_DOOR_3_STARS, "3-Star Door", DOOR_ANIMS)
+MODEL(MODEL_CASTLE_METAL_DOOR, "Metal Door", DOOR_ANIMS)
+MODEL(MODEL_BBH_HAUNTED_DOOR, "BBH Door", DOOR_ANIMS)
+MODEL(MODEL_HMC_HAZY_MAZE_DOOR, "HMC Door", DOOR_ANIMS)
+
+#undef DOOR_ANIMS
+
 MODEL(MODEL_GOOMBA, "Goomba",
-    MODEL_ANIM("IDLE", goomba_seg8_anim_0801DA34)
+    INITIAL_MODEL_ANIM("IDLE", goomba_seg8_anim_0801DA34)
+)
+
+#define KOOPA_ANIMS \
+    MODEL_ANIM("FALLING_ON_GROUND", koopa_seg6_anim_0600CC24) \
+    MODEL_ANIM("RUNNING_FAST", koopa_seg6_anim_0600CFB8) \
+    MODEL_ANIM("SLIDING", koopa_seg6_anim_0600D518) \
+    MODEL_ANIM("RUNNING_WIHOUT_SHELL", koopa_seg6_anim_0600D804) \
+    MODEL_ANIM("RUNNING", koopa_seg6_anim_0600DD90) \
+    MODEL_ANIM("FALLING_ON_GROUND2", koopa_seg6_anim_0600E32C) \
+    MODEL_ANIM("STANDING_UP", koopa_seg6_anim_0600E928) \
+    INITIAL_MODEL_ANIM("IDLE", koopa_seg6_anim_0600F3EC) \
+    MODEL_ANIM("STANDING_UP2", koopa_seg6_anim_0600FB1C) \
+    MODEL_ANIM("WALKING", koopa_seg6_anim_06010258) \
+    MODEL_ANIM("WALKING_STOP", koopa_seg6_anim_06010634) \
+    MODEL_ANIM("WALKING_START", koopa_seg6_anim_06010E48) \
+    MODEL_ANIM("JUMP", koopa_seg6_anim_0601134C) \
+    MODEL_ANIM("LAND", koopa_seg6_anim_060110D8) \
+
+MODEL(MODEL_KOOPA_WITH_SHELL, "Koopa", KOOPA_ANIMS)
+MODEL(MODEL_KOOPA_WITHOUT_SHELL, "Koopa (without shell)", KOOPA_ANIMS)
+
+#undef KOOPA_ANIMS
+
+MODEL(MODEL_FLYGUY, "Fly Guy",
+    INITIAL_MODEL_ANIM("IDLE", flyguy_seg8_anim_08011A4C)
+)
+MODEL(MODEL_PIRANHA_PLANT, "Piranha Plant",
+    INITIAL_MODEL_ANIM("CHOMPING", piranha_plant_seg6_anim_06017C38)
+    MODEL_ANIM("WAKING_UP", piranha_plant_seg6_anim_06017D88)
+    MODEL_ANIM("DYING", piranha_plant_seg6_anim_060187B0)
+    MODEL_ANIM("CHOMP_FORWARD", piranha_plant_seg6_anim_06018BA8)
+    MODEL_ANIM("CHOMP_END", piranha_plant_seg6_anim_06019854)
+    MODEL_ANIM("CHOMP_END_SLEEP", piranha_plant_seg6_anim_0601A014)
+    MODEL_ANIM("GO_TO_SLEEP", piranha_plant_seg6_anim_0601AF34)
+    MODEL_ANIM("WAKING_UP2", piranha_plant_seg6_anim_0601AAE4)
+    MODEL_ANIM("SLEEPING", piranha_plant_seg6_anim_0601B634)
+    MODEL_ANIM("CHOMPING2", piranha_plant_seg6_anim_0601C304)
+)
+MODEL(MODEL_BULLY, "Bully",
+    INITIAL_MODEL_ANIM("WALKING", bully_seg5_anim_05004598)
+    MODEL_ANIM("WALKING2", bully_seg5_anim_050043D8)
+    MODEL_ANIM("BUMP", bully_seg5_anim_050042A4)
+    MODEL_ANIM("RECOVER", bully_seg5_anim_050046F4)
+)
+MODEL(MODEL_CHILL_BULLY, "Chill Bully",
+    INITIAL_MODEL_ANIM("WALKING", chilly_chief_seg6_anim_060035E0)
+    MODEL_ANIM("WALKING2", chilly_chief_seg6_anim_06003420)
+    MODEL_ANIM("BUMP", chilly_chief_seg6_anim_060032EC)
+    MODEL_ANIM("RECOVER", chilly_chief_seg6_anim_0600373C)
+)
+MODEL(MODEL_LAKITU, "Lakitu (Cameraman)",
+    INITIAL_MODEL_ANIM("IDLE", lakitu_seg6_anim_060058E0)
+)
+MODEL(MODEL_ENEMY_LAKITU, "Lakitu (Enemy)",
+    INITIAL_MODEL_ANIM("IDLE", lakitu_enemy_seg5_anim_05013EDC)
+    MODEL_ANIM("LOOKING_AROUND", lakitu_enemy_seg5_anim_050140E8)
+    MODEL_ANIM("THROW_PART2", lakitu_enemy_seg5_anim_050142E0)
+    MODEL_ANIM("THROW_PART1", lakitu_enemy_seg5_anim_050144BC)
+)
+MODEL(MODEL_SPINY, "Spiny",
+    INITIAL_MODEL_ANIM("WALKING", spiny_seg5_anim_05016E94)
+)
+
+#define BOBOMB_ANIMS \
+    INITIAL_MODEL_ANIM("IDLE", bobomb_seg8_anim_080237FC) \
+    MODEL_ANIM("PICKED_UP", bobomb_seg8_anim_08023954) \
+
+MODEL(MODEL_BLACK_BOBOMB, "Bob-Omb", BOBOMB_ANIMS)
+MODEL(MODEL_BOBOMB_BUDDY, "Bob-Omb Buddy", BOBOMB_ANIMS)
+
+#undef BOBOMB_ANIMS
+
+MODEL(MODEL_KING_BOBOMB, "King Bob-Omb",
+    MODEL_ANIM("PICK_UP_MARIO", king_bobomb_seg5_anim_0500BDFC)
+    MODEL_ANIM("HOLDING_MARIO_WALKING", king_bobomb_seg5_anim_0500C2AC)
+    MODEL_ANIM("ON_GROUND", king_bobomb_seg5_anim_0500C520)
+    MODEL_ANIM("ON_GROUND2", king_bobomb_seg5_anim_0500C774)
+    MODEL_ANIM("STOMP", king_bobomb_seg5_anim_0500CFCC)
+    INITIAL_MODEL_ANIM("IDLE", king_bobomb_seg5_anim_0500D5B0)
+    MODEL_ANIM("BEING_HELD", king_bobomb_seg5_anim_0500D978)
+    MODEL_ANIM("LAND", king_bobomb_seg5_anim_0500DDD8)
+    MODEL_ANIM("JUMP", king_bobomb_seg5_anim_0500E10C)
+    MODEL_ANIM("PICK_UP_AND_THROW", king_bobomb_seg5_anim_0500F078)
+    MODEL_ANIM("STAND_UP", king_bobomb_seg5_anim_0500F6C8)
+    MODEL_ANIM("WALKING", king_bobomb_seg5_anim_0500FE18)
+)
+MODEL(MODEL_WHOMP, "Whomp",
+    INITIAL_MODEL_ANIM("WALKING", whomp_seg6_anim_060209EC)
+    MODEL_ANIM("CRUSH", whomp_seg6_anim_060202DC)
+)
+MODEL(MODEL_SCUTTLEBUG, "Scuttlebug",
+    INITIAL_MODEL_ANIM("WALKING", scuttlebug_seg6_anim_0601504C)
+)
+MODEL(MODEL_CHUCKYA, "Chuckya",
+    MODEL_ANIM("PICK_UP", chuckya_seg8_anim_0800AF68)
+    MODEL_ANIM("PICK_UP_IDLE", chuckya_seg8_anim_0800B1A8)
+    MODEL_ANIM("BEING_PICKED_UP", chuckya_seg8_anim_0800B4A8)
+    MODEL_ANIM("THROW", chuckya_seg8_anim_0800B9F8)
+    INITIAL_MODEL_ANIM("IDLE", chuckya_seg8_anim_0800BBEC)
+    MODEL_ANIM("UNKNOWN", chuckya_seg8_anim_0800C058)
+)
+MODEL(MODEL_SPINDRIFT, "Spindrift",
+    INITIAL_MODEL_ANIM("IDLE", spindrift_seg5_anim_050006AC)
+)
+MODEL(MODEL_UKIKI, "Ukiki",
+    MODEL_ANIM("RUNNING", ukiki_seg5_anim_0500D658)
+    MODEL_ANIM("WALKING", ukiki_seg5_anim_0500DC80)
+    MODEL_ANIM("SITTING", ukiki_seg5_anim_0500DDEC)
+    MODEL_ANIM("FALLING_OVER", ukiki_seg5_anim_0500EACC)
+    INITIAL_MODEL_ANIM("IDLE", ukiki_seg5_anim_0500EEA8)
+    MODEL_ANIM("JUMP_LOW", ukiki_seg5_anim_0500F530)
+    MODEL_ANIM("JUMP_HIGH", ukiki_seg5_anim_0500FC84)
+    MODEL_ANIM("LAND", ukiki_seg5_anim_0501006C)
+    MODEL_ANIM("JUMP", ukiki_seg5_anim_050103F4)
+    MODEL_ANIM("SCRATCHING", ukiki_seg5_anim_05012ABC)
+    MODEL_ANIM("HANDSTAND", ukiki_seg5_anim_05014BE4)
+    MODEL_ANIM("WALKING2", ukiki_seg5_anim_050153C4)
+    MODEL_ANIM("WALKING3", ukiki_seg5_anim_0501576C)
+)
+MODEL(MODEL_CHAIN_CHOMP, "Chain Chomp",
+    INITIAL_MODEL_ANIM("IDLE", chain_chomp_seg6_anim_06025160)
+)
+MODEL(MODEL_UNAGI, "Unagi",
+    MODEL_ANIM("IDLE_OPEN_MOUTH", unagi_seg5_anim_0500FBF4)
+    MODEL_ANIM("SWIM_START", unagi_seg5_anim_05010488)
+    MODEL_ANIM("SWIM", unagi_seg5_anim_05010B54)
+    MODEL_ANIM("SWIM_END", unagi_seg5_anim_05011488)
+    MODEL_ANIM("CLOSING_MOUTH", unagi_seg5_anim_05011890)
+    MODEL_ANIM("OPENING_MOUTH", unagi_seg5_anim_05011D40)
+    INITIAL_MODEL_ANIM("IDLE_CLOSED_MOUTH", unagi_seg5_anim_0501280C)
+)
+MODEL(MODEL_BUB, "Bub",
+    INITIAL_MODEL_ANIM("SWIM", bub_seg6_anim_0601233C)
+)
+MODEL(MODEL_SUSHI, "Sushi",
+    INITIAL_MODEL_ANIM("SWIM", sushi_seg5_anim_0500AE3C)
+)
+MODEL(MODEL_MANTA_RAY, "Manta Ray",
+    INITIAL_MODEL_ANIM("SWIM", manta_seg5_anim_05008CFC)
+)
+MODEL(MODEL_SKEETER, "Skeeter",
+    MODEL_ANIM("MOVING_WATER", skeeter_seg6_anim_06005D44)
+    MODEL_ANIM("IDLE_WATER", skeeter_seg6_anim_06006B70)
+    INITIAL_MODEL_ANIM("IDLE_LAND", skeeter_seg6_anim_060071E0)
+    MODEL_ANIM("MOVING_LAND", skeeter_seg6_anim_06007DC8)
+)
+MODEL(MODEL_BOO, "Boo", NO_ANIMS())
+MODEL(MODEL_MAD_PIANO, "Mad Piano",
+    INITIAL_MODEL_ANIM("IDLE", mad_piano_seg5_anim_05009A04)
+    MODEL_ANIM("ATTACKING", mad_piano_seg5_anim_05009AFC)
+)
+MODEL(MODEL_MONTY_MOLE, "Monty Mole",
+    INITIAL_MODEL_ANIM("HIDE", monty_mole_seg5_anim_05004FEC)
+    MODEL_ANIM("DIGGING", monty_mole_seg5_anim_0500527C)
+    MODEL_ANIM("DIG_UP", monty_mole_seg5_anim_050054B0)
+    MODEL_ANIM("LOOK_AROUND", monty_mole_seg5_anim_050062B0)
+    MODEL_ANIM("UNCOVER", monty_mole_seg5_anim_050065C0)
+    MODEL_ANIM("HIDE2", monty_mole_seg5_anim_05006880)
+    MODEL_ANIM("HIDE1", monty_mole_seg5_anim_05006B10)
+    MODEL_ANIM("JUMP_IN", monty_mole_seg5_anim_05006DB8)
+    MODEL_ANIM("THROW_ROCK", monty_mole_seg5_anim_05007230)
+    MODEL_ANIM("HIDDEN", monty_mole_seg5_anim_050065D8)
+)
+MODEL(MODEL_MONEYBAG, "Moneybag",
+    INITIAL_MODEL_ANIM("IDLE", moneybag_seg6_anim_06005AD8)
+    MODEL_ANIM("JUMP_START", moneybag_seg6_anim_06005BEC)
+    MODEL_ANIM("JUMP_IN_AIR", moneybag_seg6_anim_06005C98)
+    MODEL_ANIM("LAND", moneybag_seg6_anim_06005D3C)
+    MODEL_ANIM("WALKING", moneybag_seg6_anim_06005E44)
+)
+MODEL(MODEL_SWOOP, "Swoop",
+    INITIAL_MODEL_ANIM("FLYING", swoop_seg6_anim_06006E88)
+    MODEL_ANIM("FLYING2", swoop_seg6_anim_060070B8)
+)
+MODEL(MODEL_HEAVE_HO, "Heave Ho",
+    MODEL_ANIM("MOVING", heave_ho_seg5_anim_05015118)
+    MODEL_ANIM("THROWING", heave_ho_seg5_anim_05015334)
+    INITIAL_MODEL_ANIM("IDLE", heave_ho_seg5_anim_05014F28)
+)
+MODEL(MODEL_AMP, "Amp",
+    INITIAL_MODEL_ANIM("IDLE", amp_seg8_anim_0800401C)
+)
+MODEL(MODEL_KLEPTO, "Klepto",
+    INITIAL_MODEL_ANIM("FLYING", klepto_seg5_anim_05005E44)
+    MODEL_ANIM("HURT", klepto_seg5_anim_05007574)
+    MODEL_ANIM("GLIDING_END", klepto_seg5_anim_050079B0)
+    MODEL_ANIM("GLIDING_START", klepto_seg5_anim_05007E34)
+    MODEL_ANIM("GLIDING", klepto_seg5_anim_050086C0)
+    MODEL_ANIM("FLYING_SMALL1", klepto_seg5_anim_05008A18)
+    MODEL_ANIM("FLYING_SMALL2", klepto_seg5_anim_05008CE4)
 )

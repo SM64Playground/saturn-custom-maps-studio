@@ -1237,9 +1237,9 @@ void saturn_imgui_update() {
         imgui_bundled_tooltip("This Mario is used for calculations in enemy\nbehaviors and is not visible in renders.");
         ImGui::PushItemWidth(200);
         if (ImGui::BeginCombo("Model", saturn_object_names[current_mario_model].c_str())) {
-            for (auto model_entry : saturn_object_names) {
-                bool selected = model_entry.first == current_mario_model;
-                if (ImGui::Selectable(model_entry.second.c_str(), selected)) current_mario_model = (ModelID)model_entry.first;
+            for (auto model_entry : saturn_iterable_obj_list) {
+                bool selected = model_entry == current_mario_model;
+                if (ImGui::Selectable(saturn_object_names[model_entry].c_str(), selected)) current_mario_model = (ModelID)model_entry;
             }
             ImGui::EndCombo();
         }

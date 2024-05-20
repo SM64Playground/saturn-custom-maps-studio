@@ -38,13 +38,17 @@ MarioActor* saturn_spawn_actor(float x, float y, float z) {
     actor.x = x;
     actor.y = y;
     actor.z = z;
+    auto range = saturn_animation_obj_ranges[current_mario_model];
     actor.animstate.custom = false;
-    actor.animstate.id = current_mario_model == MODEL_MARIO ? MARIO_ANIM_A_POSE : saturn_animation_obj_ranges[current_mario_model].first;
+    actor.animstate.id = current_mario_model == MODEL_MARIO ? MARIO_ANIM_A_POSE : range.first;
     actor.animstate.frame = 0;
     actor.animstate.yTransform = current_mario_model == MODEL_MARIO ? 0xBD : 0x00;
     actor.obj_model = current_mario_model;
-    auto anim = saturn_animation_data[saturn_animation_obj_ranges[current_mario_model].first];
-    actor.num_bones = anim.second(anim.first).unk0A;
+    auto anim = saturn_animation_data[range.first];
+    actor.num_bones = range.second - range.first == 0 ? 0 : anim.second(anim.first).unk0A;
+    if (actor.num_bones != 0 && saturn_obj_initial_anims.find(current_mario_model) != saturn_obj_initial_anims.end()) {
+        actor.animstate.id = saturn_obj_initial_anims[current_mario_model];
+    }
     return saturn_add_actor(actor);
 }
 

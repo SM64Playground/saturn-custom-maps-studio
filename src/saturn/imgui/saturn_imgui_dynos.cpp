@@ -331,7 +331,7 @@ void sdynos_imgui_menu(int index) {
     }
 
     // Animation Mixtape
-    if (ImGui::BeginMenu(ICON_FK_FILM " Animation Mixtape###menu_anim_player")) {
+    if (actor->num_bones != 0) if (ImGui::BeginMenu(ICON_FK_FILM " Animation Mixtape###menu_anim_player")) {
         imgui_machinima_animation_player(actor);
         ImGui::EndMenu();
     }
@@ -364,9 +364,8 @@ void sdynos_imgui_menu(int index) {
             if (empty) ImGui::EndDisabled();
             ImGui::EndMenu();
         }
+        ImGui::Separator();
     }
-
-    ImGui::Separator();
 
     if (!actor->model.ColorCodeSupport) ImGui::BeginDisabled();
         ImGui::Checkbox("Color Code Support", &actor->cc_support);
@@ -389,7 +388,7 @@ void sdynos_imgui_menu(int index) {
         ImGui::BeginChild("Misc.###misc_child", ImVec2(275, 175), true, ImGuiWindowFlags_None);
         if (ImGui::BeginTabBar("###misc_tabbar", ImGuiTabBarFlags_None)) {
 
-            if (ImGui::BeginTabItem("Switches###switches_scale")) {
+            if (actor->obj_model == MODEL_MARIO) if (ImGui::BeginTabItem("Switches###switches_scale")) {
                 const char* eyes[] = { "Blinking", "Open", "Half", "Closed", "Left", "Right", "Up", "Down", "Dead" };
                 ImGui::Combo("Eyes###eye_state", &actor->eye_state, eyes, IM_ARRAYSIZE(eyes));
                 saturn_keyframe_popout("k_switch_eyes");
@@ -432,24 +431,26 @@ void sdynos_imgui_menu(int index) {
                         actor->zScale = 1.f;
                     }
                 }
-                if (link_scaling) {
-                    ImGui::SliderFloat("RH Size", &actor->scaler[0][0], -2, 2);
-                    saturn_keyframe_popout("k_rh_scale");
-                    ImGui::SliderFloat("LH Size", &actor->scaler[1][0], -2, 2);
-                    saturn_keyframe_popout("k_lh_scale");
-                    ImGui::SliderFloat("RF Size", &actor->scaler[2][0], -2, 2);
-                    saturn_keyframe_popout("k_rf_scale");
-                    vec3f_set(actor->scaler[0], actor->scaler[0][0], actor->scaler[0][0], actor->scaler[0][0]);
-                    vec3f_set(actor->scaler[1], actor->scaler[1][0], actor->scaler[1][0], actor->scaler[1][0]);
-                    vec3f_set(actor->scaler[2], actor->scaler[2][0], actor->scaler[2][0], actor->scaler[2][0]);
-                }
-                else {
-                    ImGui::SliderFloat3("RH Size", actor->scaler[0], -2, 2);
-                    saturn_keyframe_popout("k_rh_scale");
-                    ImGui::SliderFloat3("LH Size", actor->scaler[1], -2, 2);
-                    saturn_keyframe_popout("k_lh_scale");
-                    ImGui::SliderFloat3("RF Size", actor->scaler[2], -2, 2);
-                    saturn_keyframe_popout("k_rf_scale");
+                if (actor->obj_model == MODEL_MARIO) {
+                    if (link_scaling) {
+                        ImGui::SliderFloat("RH Size", &actor->scaler[0][0], -2, 2);
+                        saturn_keyframe_popout("k_rh_scale");
+                        ImGui::SliderFloat("LH Size", &actor->scaler[1][0], -2, 2);
+                        saturn_keyframe_popout("k_lh_scale");
+                        ImGui::SliderFloat("RF Size", &actor->scaler[2][0], -2, 2);
+                        saturn_keyframe_popout("k_rf_scale");
+                        vec3f_set(actor->scaler[0], actor->scaler[0][0], actor->scaler[0][0], actor->scaler[0][0]);
+                        vec3f_set(actor->scaler[1], actor->scaler[1][0], actor->scaler[1][0], actor->scaler[1][0]);
+                        vec3f_set(actor->scaler[2], actor->scaler[2][0], actor->scaler[2][0], actor->scaler[2][0]);
+                    }
+                    else {
+                        ImGui::SliderFloat3("RH Size", actor->scaler[0], -2, 2);
+                        saturn_keyframe_popout("k_rh_scale");
+                        ImGui::SliderFloat3("LH Size", actor->scaler[1], -2, 2);
+                        saturn_keyframe_popout("k_lh_scale");
+                        ImGui::SliderFloat3("RF Size", actor->scaler[2], -2, 2);
+                        saturn_keyframe_popout("k_rf_scale");
+                    }
                 }
 
                 if (mario_exists) {
@@ -487,10 +488,12 @@ void sdynos_imgui_menu(int index) {
         if (ImGui::BeginTable("misc_table", 2)) {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::Checkbox("Dust Particles", &enable_dust_particles);
-            imgui_bundled_tooltip("Displays dust particles when Mario moves.");
-            ImGui::Checkbox("Torso Rotations", &enable_torso_rotation);
-            imgui_bundled_tooltip("Tilts Mario's torso when he moves; Disable for a \"beta running\" effect.");
+            if (actor->obj_model == MODEL_MARIO) {
+                ImGui::Checkbox("Dust Particles", &enable_dust_particles);
+                imgui_bundled_tooltip("Displays dust particles when Mario moves.");
+                ImGui::Checkbox("Torso Rotations", &enable_torso_rotation);
+                imgui_bundled_tooltip("Tilts Mario's torso when he moves; Disable for a \"beta running\" effect.");
+            }
             ImGui::Checkbox("Hidden", &actor->hidden);
             imgui_bundled_tooltip("Makes the Mario not visible in renders.");
             saturn_keyframe_popout("k_mario_hidden");
@@ -513,7 +516,7 @@ void sdynos_imgui_menu(int index) {
 
             ImGui::EndTable();
         }
-        if (mario_exists) if (ImGui::BeginMenu("Head Rotations")) {
+        if (mario_exists && actor->obj_model == MODEL_MARIO) if (ImGui::BeginMenu("Head Rotations")) {
             ImGui::Text("C-Up Settings");
             if (ImGui::BeginTable("headrot_table", 3)) {
                 float fake_yaw = actor->head_rot_x * 360.f / 65536;
