@@ -668,18 +668,19 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     actor->bones[i][2] = 0;
                 }
             }
-#define BONE_ENTRY(name) {                                                   \
-                ImGui::TableSetColumnIndex(0);                                \
-                ImGui::PushItemWidth(200);                                     \
-                ImGui::DragFloat3(name, actor->bones[currbone++]);              \
-                ImGui::PopItemWidth();                                           \
-                ImGui::TableSetColumnIndex(1);                                    \
-                saturn_keyframe_popout("k_mariobone_" + std::to_string(currbone)); \
-                ImGui::TableNextRow();                                              \
+#define BONE_ENTRY(name) {                                      \
+                ImGui::TableSetColumnIndex(0);                   \
+                ImGui::PushItemWidth(200);                        \
+                ImGui::DragFloat3(name, actor->bones[currbone++]); \
+                ImGui::PopItemWidth();                              \
+                ImGui::TableSetColumnIndex(1);                       \
+                saturn_keyframe_popout(KF_BONE_ID);                   \
+                ImGui::TableNextRow();                                 \
             }
             if (ImGui::BeginTable("Bone Editor", 2)) {
                 ImGui::TableNextRow();
                 if (actor->obj_model == MODEL_MARIO) {
+#define KF_BONE_ID "k_mariobone_" + std::to_string(currbone)
                     BONE_ENTRY("Root"           );
                     BONE_ENTRY("Body"           );
                     BONE_ENTRY("Torso"          );
@@ -700,10 +701,13 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     BONE_ENTRY("Upper Right Leg");
                     BONE_ENTRY("Lower Right Leg");
                     BONE_ENTRY("Right Foot"     );
+#undef KF_BONE_ID
                 }
                 else {
                     for (int i = 0; i < actor->num_bones; i++) {
+#define KF_BONE_ID "k_objbone_" + std::to_string(currbone - 1)
                         BONE_ENTRY(i == 0 ? "Root" : ("Bone " + std::to_string(i)).c_str());
+#undef KF_BONE_ID
                     }
                 }
                 ImGui::EndTable();
