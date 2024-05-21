@@ -1534,7 +1534,11 @@ void saturn_keyframe_show_kf_content(Keyframe keyframe) {
     if (timeline.type == KFTYPE_SWITCH) {
         std::string id = keyframe.timelineID;
         if (timeline.marioIndex != -1) id = id.substr(0, id.length() - 8);
-        if (kf_switch_names.find(id) == kf_switch_names.end()) ImGui::Text("u forgor");
+        if (id == "k_anim_state") {
+            MarioActor* actor = saturn_get_actor(timeline.marioIndex);
+            ImGui::Text(saturn_obj_switches[actor->obj_model][(int)keyframe.value[0]].c_str());
+        }
+        else if (kf_switch_names.find(id) == kf_switch_names.end()) ImGui::Text("u forgor");
         else ImGui::Text(kf_switch_names[id][(int)keyframe.value[0]].c_str());
     }
     ImVec2 window_pos = ImGui::GetMousePos();

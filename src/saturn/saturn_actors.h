@@ -54,6 +54,7 @@ public:
     bool custom_eyes = false;
     bool custom_bone = false;
     int custom_bone_iter = 0;
+    float anim_state = 0;
     Vec3f scaler[3];
     int num_bones = 20;
     Vec3f bones[60];

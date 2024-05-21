@@ -338,12 +338,22 @@ void sdynos_imgui_menu(int index) {
     }
     
     if (saturn_obj_switches.find(actor->obj_model) != saturn_obj_switches.end()) {
-        if (ImGui::BeginCombo("Anim State", saturn_obj_switches[actor->obj_model][actor->marioObj->oAnimState].c_str())) {
-            for (int i = 0; i < saturn_obj_switches[actor->obj_model].size(); i++) {
-                bool selected = actor->marioObj->oAnimState == i;
-                if (ImGui::Selectable(saturn_obj_switches[actor->obj_model][i].c_str(), selected)) actor->marioObj->oAnimState = i;
+        if (saturn_obj_switches[actor->obj_model][0].rfind("__ANIM_SWITCH", 0) == 0) {
+            int num_frames = std::stoi(saturn_obj_switches[actor->obj_model][0].substr(14));
+            int frame = actor->anim_state;
+            ImGui::SliderInt("Anim Frame", &frame, 0, num_frames - 1, "%d", ImGuiSliderFlags_AlwaysClamp);
+            actor->anim_state = frame;
+            saturn_keyframe_popout("k_anim_frame");
+        }
+        else {
+            if (ImGui::BeginCombo("Anim State", saturn_obj_switches[actor->obj_model][actor->anim_state].c_str())) {
+                for (int i = 0; i < saturn_obj_switches[actor->obj_model].size(); i++) {
+                    bool selected = actor->anim_state == i;
+                    if (ImGui::Selectable(saturn_obj_switches[actor->obj_model][i].c_str(), selected)) actor->anim_state = i;
+                }
+                ImGui::EndCombo();
             }
-            ImGui::EndCombo();
+            saturn_keyframe_popout("k_anim_state");
         }
     }
 

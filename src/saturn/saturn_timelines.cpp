@@ -51,6 +51,8 @@ void saturn_fill_data_table() {
     SATURN_KFENTRY_FLOAT("k_headrot_y", MARIO_ENTRY(head_rot_y), 1, "Head Rotation Roll", true);
     SATURN_KFENTRY_FLOAT("k_headrot_z", MARIO_ENTRY(head_rot_z), 1, "Head Rotation Pitch", true);
     SATURN_KFENTRY_FLOAT("k_inputrec_frame", MARIO_ENTRY(input_recording_frame), 1, "Input Playback Frame", true);
+    SATURN_KFENTRY_FLOAT("k_anim_frame", MARIO_ENTRY(anim_state), 1, "Anim Frame", true);
+    SATURN_KFENTRY_SWITCH("k_anim_state", MARIO_ENTRY(anim_state), "Anim State");
     SATURN_KFENTRY_BOOL("k_inputrec_enable", MARIO_ENTRY(playback_input), "Input Playback Enable", true);
     SATURN_KFENTRY_BOOL("k_mario_hidden", MARIO_ENTRY(hidden), "Hidden", true);
     SATURN_KFENTRY_BOOL("k_hud", &configHUD, "HUD", false);

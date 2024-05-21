@@ -205,6 +205,7 @@ void bhv_mario_actor_loop() {
         }
     }
     o->oOpacity = 0xFF;
+    o->oAnimState = actor->anim_state;
     cur_obj_set_model(actor->obj_model);
 }
 

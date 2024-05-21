@@ -151,13 +151,13 @@ static std::map<int, int> saturn_obj_initial_anims = {
 #undef SWITCHES_ANIM
 #undef NO_ANIMS
 
-#define MODEL(id, name, anims) anims switches.insert({ id, curr_switches }); curr_switches.clear();
+#define MODEL(id, name, anims) anims if (!curr_switches.empty()) switches.insert({ id, curr_switches }); curr_switches.clear();
 #define MARIO_ANIM(name)
 #define MODEL_ANIM(name, addr)
 #define INITIAL_MARIO_ANIM(name)
 #define INITIAL_MODEL_ANIM(name, addr)
 #define SWITCHES(switches...) for (std::string entry : { switches }) { curr_switches.push_back(entry); }
-#define SWITCHES_ANIM(frames) for (int i = 1; i <= frames; i++) { curr_switches.push_back("Anim Frame " + std::to_string(i)); }
+#define SWITCHES_ANIM(frames) curr_switches.push_back("__ANIM_SWITCH_" + std::to_string(frames));
 #define NO_ANIMS()
 static std::map<int, std::vector<std::string>> __saturn_mk_switches() {
     std::map<int, std::vector<std::string>> switches = {};
