@@ -73,6 +73,9 @@ static struct Animation from_addr(const void* addr) {
 #define INITIAL_MARIO_ANIM(name) MARIO_ANIM(name)
 #define INITIAL_MODEL_ANIM(name, addr) MODEL_ANIM(name, addr)
 #define NO_ANIMS()
+#define SWITCHES(switches...)
+#define SWITCHES_ANIM(frames)
+#define SWITCHES_EYES() SWITCHES("Eyes Open", "Eyes Closed")
 static std::vector<std::pair<const void*, std::function<struct Animation(const void*)>>> saturn_animation_data = {
 #include "saturn_animation_def.h"
 };
@@ -139,11 +142,40 @@ static std::map<int, int> saturn_obj_initial_anims = {
 #undef MODEL
 #undef MARIO_ANIM
 #undef MODEL_ANIM
-#undef INTIIAL_MARIO_ANIM
+#undef INITIAL_MARIO_ANIM
 #undef INITIAL_MODEL_ANIM
 #undef INC
-#undef INC
-#undef INC
+#undef INC1
+#undef INC2
+#undef SWITCHES
+#undef SWITCHES_ANIM
+#undef NO_ANIMS
+
+#define MODEL(id, name, anims) anims switches.insert({ id, curr_switches }); curr_switches.clear();
+#define MARIO_ANIM(name)
+#define MODEL_ANIM(name, addr)
+#define INITIAL_MARIO_ANIM(name)
+#define INITIAL_MODEL_ANIM(name, addr)
+#define SWITCHES(switches...) for (std::string entry : { switches }) { curr_switches.push_back(entry); }
+#define SWITCHES_ANIM(frames) for (int i = 1; i <= frames; i++) { curr_switches.push_back("Anim Frame " + std::to_string(i)); }
+#define NO_ANIMS()
+static std::map<int, std::vector<std::string>> __saturn_mk_switches() {
+    std::map<int, std::vector<std::string>> switches = {};
+    std::vector<std::string> curr_switches = {};
+#include "saturn_animation_def.h"
+    return switches;
+}
+#undef MODEL
+#undef MARIO_ANIM
+#undef MODEL_ANIM
+#undef INITIAL_MARIO_ANIM
+#undef INITIAL_MODEL_ANIM
+#undef SWITCHES
+#undef SWITCHES_EYES
+#undef SWITCHES_ANIM
+#undef NO_ANIMS
+
+static std::map<int, std::vector<std::string>> saturn_obj_switches = __saturn_mk_switches();
 
 #endif
 

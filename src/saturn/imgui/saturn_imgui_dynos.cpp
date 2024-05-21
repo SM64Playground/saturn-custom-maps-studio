@@ -9,6 +9,7 @@
 #include <iostream>
 #include "GL/glew.h"
 #include "saturn/saturn_actors.h"
+#include "saturn/saturn_animation_ids.h"
 #include "types.h"
 
 #ifdef _WIN32
@@ -334,6 +335,16 @@ void sdynos_imgui_menu(int index) {
     if (actor->num_bones != 0) if (ImGui::BeginMenu(ICON_FK_FILM " Animation Mixtape###menu_anim_player")) {
         imgui_machinima_animation_player(actor);
         ImGui::EndMenu();
+    }
+    
+    if (saturn_obj_switches.find(actor->obj_model) != saturn_obj_switches.end()) {
+        if (ImGui::BeginCombo("Anim State", saturn_obj_switches[actor->obj_model][actor->marioObj->oAnimState].c_str())) {
+            for (int i = 0; i < saturn_obj_switches[actor->obj_model].size(); i++) {
+                bool selected = actor->marioObj->oAnimState == i;
+                if (ImGui::Selectable(saturn_obj_switches[actor->obj_model][i].c_str(), selected)) actor->marioObj->oAnimState = i;
+            }
+            ImGui::EndCombo();
+        }
     }
 
     if (actor->obj_model == MODEL_MARIO) {

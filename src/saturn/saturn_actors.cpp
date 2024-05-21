@@ -44,6 +44,10 @@ MarioActor* saturn_spawn_actor(float x, float y, float z) {
     actor.animstate.frame = 0;
     actor.animstate.yTransform = current_mario_model == MODEL_MARIO ? 0xBD : 0x00;
     actor.obj_model = current_mario_model;
+    if (range.first >= saturn_animation_data.size()) {
+        actor.num_bones = 0;
+        return saturn_add_actor(actor);
+    }
     auto anim = saturn_animation_data[range.first];
     actor.num_bones = range.second - range.first == 0 ? 0 : anim.second(anim.first).unk0A;
     if (actor.num_bones != 0 && saturn_obj_initial_anims.find(current_mario_model) != saturn_obj_initial_anims.end()) {
@@ -176,27 +180,29 @@ void bhv_mario_actor_loop() {
         o->oPosY = actor->y;
         o->oPosZ = actor->z;
         o->oFaceAngleYaw = actor->angle;
-        o->header.gfx.unk38.curAnim = &actor->anim;
-        if (actor->animstate.custom) {
-            o->header.gfx.unk38.curAnim->flags = 4;
-            o->header.gfx.unk38.curAnim->unk02 = 0;
-            o->header.gfx.unk38.curAnim->unk04 = 0;
-            o->header.gfx.unk38.curAnim->unk06 = 0;
-            o->header.gfx.unk38.curAnim->unk08 = (s16)actor->animstate.length;
-            o->header.gfx.unk38.curAnim->unk0A = actor->animstate.customanim_indices.size() / 6 - 1;
-            o->header.gfx.unk38.curAnim->values = actor->animstate.customanim_values.data();
-            o->header.gfx.unk38.curAnim->index = (const u16*)actor->animstate.customanim_indices.data();
-            o->header.gfx.unk38.curAnim->length = (s16)actor->animstate.length;
+        if (actor->num_bones != 0) {
+            o->header.gfx.unk38.curAnim = &actor->anim;
+            if (actor->animstate.custom) {
+                o->header.gfx.unk38.curAnim->flags = 4;
+                o->header.gfx.unk38.curAnim->unk02 = 0;
+                o->header.gfx.unk38.curAnim->unk04 = 0;
+                o->header.gfx.unk38.curAnim->unk06 = 0;
+                o->header.gfx.unk38.curAnim->unk08 = (s16)actor->animstate.length;
+                o->header.gfx.unk38.curAnim->unk0A = actor->animstate.customanim_indices.size() / 6 - 1;
+                o->header.gfx.unk38.curAnim->values = actor->animstate.customanim_values.data();
+                o->header.gfx.unk38.curAnim->index = (const u16*)actor->animstate.customanim_indices.data();
+                o->header.gfx.unk38.curAnim->length = (s16)actor->animstate.length;
+            }
+            else {
+                auto anim = saturn_animation_data[actor->animstate.id];
+                actor->anim = anim.second(anim.first);
+                o->header.gfx.unk38.animID = actor->animstate.id;
+                o->header.gfx.unk38.curAnim->flags = 4; // prevent the anim to get a mind on its own
+                actor->animstate.length = o->header.gfx.unk38.curAnim->unk08;
+            }
+            o->header.gfx.unk38.animYTrans = actor->animstate.yTransform;
+            o->header.gfx.unk38.animFrame = wrap((int)actor->animstate.frame, actor->animstate.length);
         }
-        else {
-            auto anim = saturn_animation_data[actor->animstate.id];
-            actor->anim = anim.second(anim.first);
-            o->header.gfx.unk38.animID = actor->animstate.id;
-            o->header.gfx.unk38.curAnim->flags = 4; // prevent the anim to get a mind on its own
-            actor->animstate.length = o->header.gfx.unk38.curAnim->unk08;
-        }
-        o->header.gfx.unk38.animYTrans = actor->animstate.yTransform;
-        o->header.gfx.unk38.animFrame = wrap((int)actor->animstate.frame, actor->animstate.length);
     }
     o->oOpacity = 0xFF;
     cur_obj_set_model(actor->obj_model);

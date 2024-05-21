@@ -233,6 +233,7 @@ MODEL(MODEL_PEACH, "Peach",
     MODEL_ANIM("ENDING_PART6", peach_seg5_anim_05018664)
     MODEL_ANIM("ENDING_PART7", peach_seg5_anim_0501B328)
     MODEL_ANIM("WAVING", peach_seg5_anim_0501C404)
+    SWITCHES("Eyes Wide Open", "Eyes Open", "Eyes Half Closed", "Eyes Closed", "Smiling Eyes Wide Open", "Smiling Eyes Open", "Smiling Eyes Half Closed", "Smiling Eyes Closed")
 )
 MODEL(MODEL_BOWSER, "Bowser",
     MODEL_ANIM("STANDING_UP", bowser_seg6_anim_060445EC)
@@ -262,17 +263,20 @@ MODEL(MODEL_BOWSER, "Bowser",
     MODEL_ANIM("LAND", bowser_seg6_anim_06055984)
     MODEL_ANIM("BLOWN_AWAY2", bowser_seg6_anim_06056774)
     MODEL_ANIM("STANDING_UP2", bowser_seg6_anim_06057678)
+    SWITCHES("Eyes Open", "Eyes Half Closed", "Eyes Closed", "Looking Right", "Looking Right Behind", "Looking Left", "Looking Left Behind", "Derp", "Angry")
 )
 MODEL(MODEL_PENGUIN, "Penguin",
     MODEL_ANIM("WALKING", penguin_seg5_anim_05008B5C)
     MODEL_ANIM("SLIDE_START", penguin_seg5_anim_050079E4)
     MODEL_ANIM("SLIDE_END", penguin_seg5_anim_05007DCC)
     INITIAL_MODEL_ANIM("IDLE", penguin_seg5_anim_050087C0)
+    SWITCHES("Eyes Open", "Eyes Half Closed", "Eyes Closed", "Angry", "Sad")
 )
 MODEL(MODEL_YOSHI, "Yoshi",
     INITIAL_MODEL_ANIM("IDLE", yoshi_seg5_anim_050233A4)
     MODEL_ANIM("WALKING", yoshi_seg5_anim_05023E4C)
     MODEL_ANIM("JUMPING", yoshi_seg5_anim_050240E8)
+    SWITCHES_EYES()
 )
 MODEL(MODEL_MIPS, "Mips",
     INITIAL_MODEL_ANIM("IDLE", mips_seg6_anim_06014B94)
@@ -317,7 +321,8 @@ MODEL(MODEL_HMC_HAZY_MAZE_DOOR, "HMC Door", DOOR_ANIMS)
 #undef DOOR_ANIMS
 
 MODEL(MODEL_GOOMBA, "Goomba",
-    INITIAL_MODEL_ANIM("IDLE", goomba_seg8_anim_0801DA34)
+    INITIAL_MODEL_ANIM("IDLE", goomba_seg8_anim_0801DA34) \
+    SWITCHES_EYES()
 )
 
 #define KOOPA_ANIMS \
@@ -335,6 +340,7 @@ MODEL(MODEL_GOOMBA, "Goomba",
     MODEL_ANIM("WALKING_START", koopa_seg6_anim_06010E48) \
     MODEL_ANIM("JUMP", koopa_seg6_anim_0601134C) \
     MODEL_ANIM("LAND", koopa_seg6_anim_060110D8) \
+    SWITCHES_EYES() \
 
 MODEL(MODEL_KOOPA_WITH_SHELL, "Koopa", KOOPA_ANIMS)
 MODEL(MODEL_KOOPA_WITHOUT_SHELL, "Koopa (without shell)", KOOPA_ANIMS)
@@ -370,12 +376,14 @@ MODEL(MODEL_CHILL_BULLY, "Chill Bully",
 )
 MODEL(MODEL_LAKITU, "Lakitu (Cameraman)",
     INITIAL_MODEL_ANIM("IDLE", lakitu_seg6_anim_060058E0)
+    SWITCHES_EYES()
 )
 MODEL(MODEL_ENEMY_LAKITU, "Lakitu (Enemy)",
     INITIAL_MODEL_ANIM("IDLE", lakitu_enemy_seg5_anim_05013EDC)
     MODEL_ANIM("LOOKING_AROUND", lakitu_enemy_seg5_anim_050140E8)
     MODEL_ANIM("THROW_PART2", lakitu_enemy_seg5_anim_050142E0)
     MODEL_ANIM("THROW_PART1", lakitu_enemy_seg5_anim_050144BC)
+    SWITCHES_EYES()
 )
 MODEL(MODEL_SPINY, "Spiny",
     INITIAL_MODEL_ANIM("WALKING", spiny_seg5_anim_05016E94)
@@ -384,6 +392,7 @@ MODEL(MODEL_SPINY, "Spiny",
 #define BOBOMB_ANIMS \
     INITIAL_MODEL_ANIM("IDLE", bobomb_seg8_anim_080237FC) \
     MODEL_ANIM("PICKED_UP", bobomb_seg8_anim_08023954) \
+    SWITCHES_EYES() \
 
 MODEL(MODEL_BLACK_BOBOMB, "Bob-Omb", BOBOMB_ANIMS)
 MODEL(MODEL_BOBOMB_BUDDY, "Bob-Omb Buddy", BOBOMB_ANIMS)
@@ -436,6 +445,7 @@ MODEL(MODEL_UKIKI, "Ukiki",
     MODEL_ANIM("HANDSTAND", ukiki_seg5_anim_05014BE4)
     MODEL_ANIM("WALKING2", ukiki_seg5_anim_050153C4)
     MODEL_ANIM("WALKING3", ukiki_seg5_anim_0501576C)
+    SWITCHES("Eyes Open", "Eyes Closed", "Eyes Open (With Cap)", "Eyes Closed (With Cap)")
 )
 MODEL(MODEL_CHAIN_CHOMP, "Chain Chomp",
     INITIAL_MODEL_ANIM("IDLE", chain_chomp_seg6_anim_06025160)
@@ -448,6 +458,7 @@ MODEL(MODEL_UNAGI, "Unagi",
     MODEL_ANIM("CLOSING_MOUTH", unagi_seg5_anim_05011890)
     MODEL_ANIM("OPENING_MOUTH", unagi_seg5_anim_05011D40)
     INITIAL_MODEL_ANIM("IDLE_CLOSED_MOUTH", unagi_seg5_anim_0501280C)
+    SWITCHES("No Star", "Star")
 )
 MODEL(MODEL_BUB, "Bub",
     INITIAL_MODEL_ANIM("SWIM", bub_seg6_anim_0601233C)
@@ -499,6 +510,7 @@ MODEL(MODEL_HEAVE_HO, "Heave Ho",
 )
 MODEL(MODEL_AMP, "Amp",
     INITIAL_MODEL_ANIM("IDLE", amp_seg8_anim_0800401C)
+    SWITCHES("Uncharged", "Charged")
 )
 MODEL(MODEL_KLEPTO, "Klepto",
     INITIAL_MODEL_ANIM("FLYING", klepto_seg5_anim_05005E44)
@@ -508,4 +520,21 @@ MODEL(MODEL_KLEPTO, "Klepto",
     MODEL_ANIM("GLIDING", klepto_seg5_anim_050086C0)
     MODEL_ANIM("FLYING_SMALL1", klepto_seg5_anim_05008A18)
     MODEL_ANIM("FLYING_SMALL2", klepto_seg5_anim_05008CE4)
+    SWITCHES("Nothing", "Cap", "Star", "Blue Star")
+)
+MODEL(MODEL_EXPLOSION, "Explosion",
+    NO_ANIMS()
+    SWITCHES_ANIM(10)
+)
+MODEL(MODEL_RED_FLAME, "Red Flame",
+    NO_ANIMS()
+    SWITCHES_ANIM(8)
+)
+MODEL(MODEL_BLUE_FLAME, "Blue Flame",
+    NO_ANIMS()
+    SWITCHES_ANIM(8)
+)
+MODEL(MODEL_YOSHI_EGG, "Yoshi Egg",
+    NO_ANIMS()
+    SWITCHES_ANIM(14)
 )
