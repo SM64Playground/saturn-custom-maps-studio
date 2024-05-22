@@ -262,12 +262,21 @@ void unload_area(void) {
 
 void load_mario_area(void) {
     func_80320890();
-    load_area(gMarioSpawnInfo->areaIndex);
 
-    if (gCurrentArea->index == gMarioSpawnInfo->areaIndex) {
+    // fuck you nintendo for introducing this stupid studio bug that i fixed rn
+    // https://tenor.com/view/suit-up-gif-26300871
+
+    s32 area = gCurrAreaIndex;
+    if (area == 0) area = gMarioSpawnInfo->areaIndex; // <- this variable fucking sucks
+    load_area(area);
+
+    // WHY WAS THIS HERE????
+    //if (gCurrentArea->index == gMarioSpawnInfo->areaIndex) {
         gCurrentArea->flags |= 0x01;
         spawn_objects_from_info(0, gMarioSpawnInfo);
-    }
+    //}
+
+    // i really question nintendos code sometimes...
 }
 
 void unload_mario_area(void) {
