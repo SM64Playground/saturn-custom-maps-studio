@@ -298,6 +298,10 @@ void smachinima_imgui_init() {
 bool enabled_acts[6];
 int current_warp_area = 1;
 
+int frames_to_simulate = 300;
+
+extern struct Object gObjectPool[960];
+
 void imgui_machinima_quick_options() {
     if (ImGui::MenuItem(ICON_FK_CLOCK_O " Limit FPS",      "F4", limit_fps)) {
         limit_fps = !limit_fps;
@@ -513,6 +517,17 @@ void imgui_machinima_quick_options() {
 
         ImGui::EndMenu();
     }
+    
+    ImGui::InputInt("###simulation_frames", &frames_to_simulate, 1, 10);
+    ImGui::SameLine();
+    if (ImGui::Button("Simulate")) {
+        saturn_simulate(frames_to_simulate);
+    }
+    ImGui::BeginDisabled(!world_simulation_data);
+    if (ImGui::SliderInt("Simulation Frame", &world_simulation_curr_frame, 0, world_simulation_frames - 1, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+        memcpy(gObjectPool, world_simulation_data[world_simulation_curr_frame], sizeof(*world_simulation_data));
+    }
+    ImGui::EndDisabled();
 
     UNSTABLE
     if (ImGui::BeginMenu("(!) Custom Level")) {

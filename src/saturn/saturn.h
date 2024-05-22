@@ -128,6 +128,10 @@ extern struct Object* saturn_camera_object;
 
 extern bool setting_mario_struct_pos;
 
+extern struct Object (*world_simulation_data)[960];
+extern int world_simulation_frames;
+extern int world_simulation_curr_frame;
+
 #ifdef __cplusplus
 #include <string>
 #include <vector>
@@ -202,6 +206,7 @@ extern int autosaveDelay;
 
 extern Vec3f stored_mario_pos;
 extern Vec3s stored_mario_angle;
+extern void saturn_simulate(int);
 extern void saturn_copy_camera(bool);
 extern void saturn_paste_camera(void);
 extern void* saturn_keyframe_get_timeline_ptr(KeyframeTimeline&);

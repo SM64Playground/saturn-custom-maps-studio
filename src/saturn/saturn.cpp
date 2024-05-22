@@ -143,6 +143,27 @@ struct Object* saturn_camera_object = nullptr;
 
 bool setting_mario_struct_pos = false;
 
+struct Object (*world_simulation_data)[960] = nullptr;
+int world_simulation_frames = 0;
+int world_simulation_curr_frame = 0;
+
+extern struct Object gObjectPool[960];
+extern void area_update_objects();
+
+void saturn_simulate(int frames) {
+    if (world_simulation_data) {
+        memcpy(gObjectPool, world_simulation_data[0], sizeof(*world_simulation_data));
+        free(world_simulation_data);
+    }
+    world_simulation_frames = frames;
+    world_simulation_data = (struct Object(*)[960])malloc(sizeof(*world_simulation_data) * frames);
+    memcpy(world_simulation_data[0], gObjectPool, sizeof(*world_simulation_data));
+    for (int i = 1; i < frames; i++) {
+        area_update_objects();
+        memcpy(world_simulation_data[i], gObjectPool, sizeof(*world_simulation_data));
+    }
+}
+
 extern "C" {
 #include "game/camera.h"
 #include "game/area.h"

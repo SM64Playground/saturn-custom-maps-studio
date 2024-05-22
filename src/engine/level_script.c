@@ -673,7 +673,7 @@ static void level_cmd_2C(void) {
 }
 
 static void level_cmd_2D(void) {
-    area_update_objects();
+    //area_update_objects();
     sCurrentCmd = CMD_NEXT;
 }
 

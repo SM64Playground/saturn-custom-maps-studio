@@ -231,6 +231,7 @@ void clear_area_graph_nodes(void) {
 }
 
 void load_area(s32 index) {
+    gInitObjects = 0;
     if (gCurrentArea == NULL && gAreaData[index].unk04 != NULL) {
         gCurrentArea = &gAreaData[index];
         gCurrAreaIndex = gCurrentArea->index;
@@ -306,7 +307,7 @@ void change_area(s32 index) {
     }
 }
 
-void area_update_objects(void) {
+void area_update_objects() {
     gAreaUpdateCounter++;
     update_objects(0);
 }
