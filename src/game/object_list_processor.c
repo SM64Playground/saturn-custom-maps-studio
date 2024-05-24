@@ -297,6 +297,8 @@ s32 update_objects_starting_at(struct ObjectNode *objList, struct ObjectNode *fi
 
         gCurrentObject->header.gfx.node.flags |= GRAPH_RENDER_HAS_ANIMATION;
         cur_obj_update();
+        if (gCurrentObject->header.gfx.unk38.curAnim)
+            gCurrentObject->header.gfx.unk38.animFrame = geo_update_animation_frame(&gCurrentObject->header.gfx.unk38, NULL);
 
         firstObj = firstObj->next;
         count += 1;

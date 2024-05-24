@@ -915,9 +915,9 @@ static void geo_process_level_display_list(struct GraphNodeDisplayList *node) {
 void geo_set_animation_globals(struct GraphNodeObject_sub *node, s32 hasAnimation) {
     struct Animation *anim = node->curAnim;
 
-    if (hasAnimation != 0) {
+    /*if (hasAnimation != 0) {
         node->animFrame = geo_update_animation_frame(node, &node->animFrameAccelAssist);
-    }
+    }*/
     node->animTimer = gAreaUpdateCounter;
     if (anim->flags & ANIM_FLAG_HOR_TRANS) {
         gCurAnimType = ANIM_TYPE_VERTICAL_TRANSLATION;
