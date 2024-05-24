@@ -1006,6 +1006,8 @@ s32 play_mode_normal(void) {
         gInitObjects++;
         area_update_objects();
     }
+    update_objects_in_list(&gObjectLists[OBJ_LIST_PLAYER]);
+    update_objects_in_list(&gObjectLists[OBJ_LIST_SATURN]);
     update_hud_values();
 
     if (gCurrentArea != NULL) {
