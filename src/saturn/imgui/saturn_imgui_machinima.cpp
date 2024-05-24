@@ -523,6 +523,21 @@ void imgui_machinima_quick_options() {
     if (ImGui::Button("Simulate")) {
         saturn_simulate(frames_to_simulate);
     }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        const char* units[] = { "B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+        int unitIndex = 0;
+        size_t bytes = sizeof(gObjectPool) * frames_to_simulate;
+        int fraction = 0;
+        while (unitIndex < sizeof(units) / sizeof(*units) && bytes >= 1024) {
+            unitIndex++;
+            fraction = bytes % 1024;
+            bytes /= 1024;
+        }
+        if (fraction == 0) ImGui::Text("Memory Usage: %ld %s", bytes, units[unitIndex]);
+        else ImGui::Text("Memory Usage: %.2f %s", fraction / 1024.f + bytes, units[unitIndex]);
+        ImGui::EndTooltip();
+    }
     ImGui::BeginDisabled(!world_simulation_data);
     if (ImGui::SliderInt("Simulation Frame", &world_simulation_curr_frame, 0, world_simulation_frames - 1, "%d", ImGuiSliderFlags_AlwaysClamp)) {
         memcpy(gObjectPool, world_simulation_data[world_simulation_curr_frame], sizeof(*world_simulation_data));
