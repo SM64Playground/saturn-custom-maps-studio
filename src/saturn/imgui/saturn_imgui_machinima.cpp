@@ -522,6 +522,8 @@ void imgui_machinima_quick_options() {
     ImGui::SameLine();
     if (ImGui::Button("Simulate")) {
         saturn_simulate(frames_to_simulate);
+        world_simulation_curr_frame = 0;
+        memcpy(gObjectPool, world_simulation_data[world_simulation_curr_frame], sizeof(*world_simulation_data));
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();

@@ -30,6 +30,9 @@
 #include "saturn/saturn_actors.h"
 
 extern "C" {
+#include "game/game_init.h"
+#include "engine/graph_node.h"
+#include "game/rendering_graph_node.h"
 #include "audio/external.h"
 #include "engine/surface_collision.h"
 #include "game/object_collision.h"
@@ -148,9 +151,16 @@ int world_simulation_frames = 0;
 int world_simulation_curr_frame = 0;
 
 extern struct Object gObjectPool[960];
-extern void area_update_objects();
+
+std::vector<Gfx*> gfxs = {};
+bool simulating_world = false;
+
+void saturn_add_alloc_dl(Gfx* gfx) {
+    gfxs.push_back(gfx);
+}
 
 void saturn_simulate(int frames) {
+    simulating_world = true;
     if (world_simulation_data) {
         memcpy(gObjectPool, world_simulation_data[0], sizeof(*world_simulation_data));
         free(world_simulation_data);
@@ -160,8 +170,16 @@ void saturn_simulate(int frames) {
     memcpy(world_simulation_data[0], gObjectPool, sizeof(*world_simulation_data));
     for (int i = 1; i < frames; i++) {
         area_update_objects();
+        Gfx* head = gDisplayListHead;
+        geo_process_root(gCurrentArea->unk04, NULL, NULL, 0);
+        gDisplayListHead = head;
+        for (Gfx* gfx : gfxs) {
+            free(gfx);
+        }
+        gfxs.clear();
         memcpy(world_simulation_data[i], gObjectPool, sizeof(*world_simulation_data));
     }
+    simulating_world = false;
 }
 
 extern "C" {

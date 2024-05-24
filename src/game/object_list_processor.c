@@ -1,5 +1,7 @@
 #include <PR/ultratypes.h>
 
+#include "game/game_init.h"
+#include "game/rendering_graph_node.h"
 #include "mario_animation_ids.h"
 #include "saturn/saturn_actors.h"
 #include "sm64.h"
@@ -297,9 +299,6 @@ s32 update_objects_starting_at(struct ObjectNode *objList, struct ObjectNode *fi
 
         gCurrentObject->header.gfx.node.flags |= GRAPH_RENDER_HAS_ANIMATION;
         cur_obj_update();
-        if (gCurrentObject->header.gfx.unk38.curAnim)
-            gCurrentObject->header.gfx.unk38.animFrame = geo_update_animation_frame(&gCurrentObject->header.gfx.unk38, NULL);
-
         firstObj = firstObj->next;
         count += 1;
     }

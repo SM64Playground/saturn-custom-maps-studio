@@ -132,6 +132,8 @@ extern struct Object (*world_simulation_data)[960];
 extern int world_simulation_frames;
 extern int world_simulation_curr_frame;
 
+extern bool simulating_world;
+
 #ifdef __cplusplus
 #include <string>
 #include <vector>
@@ -219,6 +221,7 @@ extern void schedule_animation();
 
 extern "C" {
 #endif
+    void saturn_add_alloc_dl(Gfx* gfx);
     void saturn_update(void);
     void saturn_play_animation(enum MarioAnimID anim);
     void saturn_play_keyframe();
@@ -229,6 +232,7 @@ extern "C" {
     bool saturn_timeline_exists(const char*);
     bool saturn_begin_extract_rom_thread();
     int saturn_splash_screen_open();
+    void saturn_add_alloc_dl(Gfx* gfx);
 #ifdef __cplusplus
 }
 #endif
