@@ -1007,7 +1007,7 @@ s32 play_mode_normal(void) {
         area_update_objects();
     }
     update_objects_in_list(&gObjectLists[OBJ_LIST_PLAYER]);
-    update_objects_in_list(&gObjectLists[OBJ_LIST_SATURN]);
+    saturn_actor_update_all();
     update_hud_values();
 
     if (gCurrentArea != NULL) {

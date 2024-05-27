@@ -738,8 +738,6 @@ void geo_call_global_function_nodes(struct GraphNode *graphNode, s32 callContext
  */
 void geo_reset_object_node(struct GraphNodeObject *graphNode) {
     init_graph_node_object(NULL, graphNode, 0, gVec3fZero, gVec3sZero, gVec3fOne);
-
-    geo_add_child(&gObjParentGraphNode, &graphNode->node);
     graphNode->node.flags &= ~GRAPH_RENDER_ACTIVE;
 }
 

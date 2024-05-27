@@ -15,12 +15,31 @@ extern "C" {
 #include "engine/math_util.h"
 #include "game/memory.h"
 #include "game/mario.h"
+#include "engine/behavior_script.h"
+#include "game/spawn_object.h"
 }
 
 #define o gCurrentObject
 
 MarioActor* gMarioActorList = nullptr;
 ModelID current_mario_model = MODEL_MARIO;
+
+MarioActor::MarioActor() {
+    PasteGameShark(GameSharkCode().GameShark, colorcode);
+    marioObj = (struct Object*)malloc(sizeof(struct Object));
+    memset(marioObj, 0, sizeof(struct Object));
+    geo_reset_object_node(&marioObj->header.gfx);
+    geo_add_child(&gObjParentGraphNode, &marioObj->header.gfx.node);
+    initialize_object(marioObj);
+    geo_obj_init((struct GraphNodeObject*)&marioObj->header.gfx, gLoadedGraphNodes[MODEL_MARIO], gVec3fZero, gVec3sZero);
+    marioObj->behavior = marioObj->curBhvCommand = bhvMarioActor;
+    marioObj->header.gfx.node.flags |= GRAPH_RENDER_ACTIVE | GRAPH_RENDER_HAS_ANIMATION;
+    marioObj->header.gfx.unk18 = gCurrAreaIndex;
+    scaler[0][0] = scaler[0][1] = scaler[0][2] =
+    scaler[1][0] = scaler[1][1] = scaler[1][2] =
+    scaler[2][0] = scaler[2][1] = scaler[2][2] = 1;
+    memset(bones, 0, sizeof(bones));
+}
 
 void delete_mario_actor_timelines(int index) {
     std::vector<std::string> ids = {};
@@ -108,7 +127,8 @@ void saturn_remove_actor(int index) {
     actorptr->exists = false;
     delete_mario_actor_timelines(index);
     actorptr->marioObj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
-    obj_mark_for_deletion(actorptr->marioObj);
+    geo_remove_child(&actorptr->marioObj->header.gfx.node);
+    free(actorptr->marioObj);
 }
 
 MarioActor* saturn_get_actor(int index) {
@@ -404,6 +424,20 @@ void saturn_actor_record_new_frame() {
     if (frame.animFrame < 0) frame.animFrame = 0;
     actor->input_recording.push_back(frame);
     latest_recording_frame = frame;
+}
+
+void saturn_actor_update_all() {
+    MarioActor* actor = gMarioActorList;
+    while (actor) {
+        if (!actor->exists) {
+            actor = actor->next;
+            continue;
+        }
+        gCurrentObject = actor->marioObj;
+        gCurrentObject->header.gfx.node.flags |= GRAPH_RENDER_HAS_ANIMATION;
+        cur_obj_update();
+        actor = actor->next;
+    }
 }
 
 struct ModelTexture {
