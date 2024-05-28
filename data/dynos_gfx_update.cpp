@@ -120,7 +120,10 @@ void DynOS_Gfx_Update() {
             }
 
             struct Object* _Object = _Actor->marioObj;
-            if (_Actor->obj_model != MODEL_MARIO) continue;
+            if (_Actor->obj_model != MODEL_MARIO) {
+                _Actor = _Actor->next;
+                continue;
+            }
 
             const Array<PackData *> &pDynosPacks = DynOS_Gfx_GetPacks();
 
