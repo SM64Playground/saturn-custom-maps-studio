@@ -83,12 +83,12 @@ extern MarioActor* saturn_add_actor(MarioActor& actor);
 extern void saturn_remove_actor(int index);
 extern MarioActor* saturn_get_actor(int index);
 extern int saturn_actor_indexof(MarioActor* actor);
-extern int saturn_actor_sizeof();
 
 extern int recording_mario_actor;
 
 extern "C" {
 #endif
+    int saturn_actor_sizeof();
     void saturn_clear_actors();
     void bhv_mario_actor_loop();
     void override_cc_color(int* r, int* g, int* b, int ccIndex, int marioIndex, int shadeIndex, float intensity, bool additive);
@@ -109,6 +109,7 @@ extern "C" {
     void saturn_actor_stop_recording();
     bool saturn_actor_is_recording_input();
     void saturn_actor_record_new_frame();
+    struct Object* saturn_actor_get_object(int index);
     void saturn_actor_update_all();
 
     void saturn_actor_add_model_texture(char* id, char* data, int w, int h);

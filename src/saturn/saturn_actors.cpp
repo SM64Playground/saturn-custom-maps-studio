@@ -426,6 +426,13 @@ void saturn_actor_record_new_frame() {
     latest_recording_frame = frame;
 }
 
+struct Object* saturn_actor_get_object(int index) {
+    MarioActor* actor = saturn_get_actor(index);
+    if (!actor) return nullptr;
+    if (!actor->exists) return nullptr;
+    return actor->marioObj;
+}
+
 void saturn_actor_update_all() {
     MarioActor* actor = gMarioActorList;
     while (actor) {
