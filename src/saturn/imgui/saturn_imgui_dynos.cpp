@@ -199,10 +199,8 @@ void OpenModelSelector(MarioActor* actor) {
                             last_model_cc_address = current_color_code.GameShark;
                         }
                     } else {
-                        if (!AnyModelsEnabled(actor)) {
-                            actor->model = Model();
-                            actor->selected_model = -1;
-                        }
+                        actor->model = Model();
+                        actor->selected_model = -1;
                         
                         // Reset model CCs
                         model_color_code_list.clear();
