@@ -222,6 +222,7 @@ extern void schedule_animation();
 extern "C" {
 #endif
     void saturn_add_alloc_dl(Gfx* gfx);
+    void saturn_free_alloc_dl();
     void saturn_update(void);
     void saturn_play_animation(enum MarioAnimID anim);
     void saturn_play_keyframe();
@@ -232,7 +233,6 @@ extern "C" {
     bool saturn_timeline_exists(const char*);
     bool saturn_begin_extract_rom_thread();
     int saturn_splash_screen_open();
-    void saturn_add_alloc_dl(Gfx* gfx);
 #ifdef __cplusplus
 }
 #endif

@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include "behavior_data.h"
+#include "game/object_list_processor.h"
 #include "sm64.h"
 
 #include "game/level_update.h"
@@ -849,7 +851,7 @@ s16 geo_update_animation_frame(struct GraphNodeObject_sub *obj, s32 *accelAssist
 
     anim = obj->curAnim;
 
-    if (obj->animTimer == gAreaUpdateCounter || anim->flags & ANIM_FLAG_2) {
+    if ((obj->animTimer == gAreaUpdateCounter && gCurrentObject->behavior != bhvMario) || anim->flags & ANIM_FLAG_2) {
         if (accelAssist != NULL) {
             accelAssist[0] = obj->animFrameAccelAssist;
         }

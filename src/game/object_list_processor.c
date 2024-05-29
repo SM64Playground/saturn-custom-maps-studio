@@ -270,7 +270,11 @@ void bhv_mario_update(void) {
     if (!saturn_actor_is_recording_input()) set_mario_action(gMarioState, ACT_DEBUG_FREE_MOVE, 0);
     particleFlags = execute_mario_action(gCurrentObject);
     gCurrentObject->oMarioParticleFlags = particleFlags;
-    if (!saturn_actor_is_recording_input()) set_mario_animation(gMarioState, MARIO_ANIM_A_POSE);
+    if (!saturn_actor_is_recording_input()) {
+        set_mario_animation(gMarioState, MARIO_ANIM_A_POSE);
+        cur_obj_unhide();
+    }
+    else cur_obj_hide();
 
     // Mario code updates MarioState's versions of position etc, so we need
     // to sync it with the Mario object
