@@ -148,7 +148,7 @@ bool setting_mario_struct_pos = false;
 
 struct Object (*world_simulation_data)[960] = nullptr;
 int world_simulation_frames = 0;
-int world_simulation_curr_frame = 0;
+float world_simulation_curr_frame = 0;
 
 extern struct Object gObjectPool[960];
 
@@ -710,6 +710,9 @@ void saturn_update() {
     }
 
     if (current_project != "") saturn_load_project((char*)current_project.c_str());
+
+    if (world_simulation_data) 
+        memcpy(gObjectPool, world_simulation_data[(int)world_simulation_curr_frame], sizeof(*world_simulation_data));
 
     // Autosave
 

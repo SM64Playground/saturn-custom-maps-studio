@@ -74,6 +74,7 @@ void saturn_fill_data_table() {
     SATURN_KFENTRY_FLOAT("k_orthopitch", &ortho_settings.rotation_x, 1, "Ortho Pitch", false);
     SATURN_KFENTRY_FLOAT("k_orthox", &ortho_settings.offset_x, 1, "Ortho Off X", false);
     SATURN_KFENTRY_FLOAT("k_orthoy", &ortho_settings.offset_y, 1, "Ortho Off Y", false);
+    SATURN_KFENTRY_FLOAT("k_worldsim_frame", &world_simulation_curr_frame, 1, "Simulation Frame", false);
     SATURN_KFENTRY_COLORF("k_light_col", gLightingColor, "Light Color", false);
     SATURN_KFENTRY_COLOR("k_color", &chromaColor, "Skybox Color", false);
     SATURN_KFENTRY_COLOR("k_hat", CC_ENTRY(CC_HAT), "Hat", true);

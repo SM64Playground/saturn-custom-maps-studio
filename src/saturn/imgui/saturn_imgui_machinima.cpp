@@ -523,7 +523,7 @@ void imgui_machinima_quick_options() {
     if (ImGui::Button("Simulate")) {
         saturn_simulate(frames_to_simulate);
         world_simulation_curr_frame = 0;
-        memcpy(gObjectPool, world_simulation_data[world_simulation_curr_frame], sizeof(*world_simulation_data));
+        if (saturn_timeline_exists("k_worldsim_frame")) k_frame_keys.erase("k_worldsim_frame");
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -541,9 +541,11 @@ void imgui_machinima_quick_options() {
         ImGui::EndTooltip();
     }
     ImGui::BeginDisabled(!world_simulation_data);
-    if (ImGui::SliderInt("Simulation Frame", &world_simulation_curr_frame, 0, world_simulation_frames - 1, "%d", ImGuiSliderFlags_AlwaysClamp)) {
-        memcpy(gObjectPool, world_simulation_data[world_simulation_curr_frame], sizeof(*world_simulation_data));
+    int frame = world_simulation_curr_frame;
+    if (ImGui::SliderInt("Simulation Frame", &frame, 0, world_simulation_frames - 1, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+        world_simulation_curr_frame = frame;
     }
+    saturn_keyframe_popout("k_worldsim_frame");
     ImGui::EndDisabled();
 
     UNSTABLE
