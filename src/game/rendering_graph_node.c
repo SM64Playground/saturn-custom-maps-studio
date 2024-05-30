@@ -1112,6 +1112,7 @@ static int obj_is_in_view(struct GraphNodeObject *node, Mat4 matrix) {
         return FALSE;
     }
 
+    if (simulating_world) return TRUE;
     if (saturn_imgui_is_orthographic()) return TRUE;
     if (gCurrentObject->behavior == bhvMario && saturn_actor_is_recording_input()) return FALSE;
 
