@@ -301,6 +301,7 @@ int current_warp_area = 1;
 int frames_to_simulate = 300;
 
 extern struct Object gObjectPool[960];
+extern u16 gRandomSeed16;
 
 void imgui_machinima_quick_options() {
     if (ImGui::MenuItem(ICON_FK_CLOCK_O " Limit FPS",      "F4", limit_fps)) {
@@ -521,6 +522,7 @@ void imgui_machinima_quick_options() {
     ImGui::InputInt("###simulation_frames", &frames_to_simulate, 1, 10);
     ImGui::SameLine();
     if (ImGui::Button("Simulate")) {
+        gRandomSeed16 = world_simulation_seed;
         saturn_simulate(frames_to_simulate);
         world_simulation_curr_frame = 0;
         if (saturn_timeline_exists("k_worldsim_frame")) k_frame_keys.erase("k_worldsim_frame");

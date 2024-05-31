@@ -285,6 +285,15 @@ bool saturn_project_custom_anim_handler(SaturnFormatStream* stream, int version)
     return true;
 }
 
+bool saturn_project_simulation_handler(SaturnFormatStream* stream, int version) {
+    extern u16 gRandomSeed16;
+    gRandomSeed16 = saturn_format_read_int16(stream);
+    world_simulation_frames = saturn_format_read_int16(stream);
+    saturn_simulate(world_simulation_frames);
+    world_simulation_curr_frame = saturn_format_read_int16(stream);
+    return true;
+}
+
 void saturn_load_project(char* filename) {
     k_frame_keys.clear();
     saturn_clear_actors();
@@ -297,6 +306,7 @@ void saturn_load_project(char* filename) {
         { "KFTL", saturn_project_keyframe_timeline_handler },
         { "LEVL", saturn_project_level_handler },
         { "CANM", saturn_project_custom_anim_handler },
+        { "WSIM", saturn_project_simulation_handler },
     });
     for (int index : actors_for_deletion) {
         saturn_remove_actor(index);
@@ -462,6 +472,13 @@ void saturn_save_project(char* filename) {
             saturn_format_write_int8(stream, kf.curve);
             saturn_format_write_int32(stream, kf.position);
         }
+        saturn_format_close_section(stream);
+    }
+    if (world_simulation_data) {
+        saturn_format_new_section(stream, "WSIM");
+        saturn_format_write_int16(stream, world_simulation_seed);
+        saturn_format_write_int16(stream, world_simulation_frames);
+        saturn_format_write_int16(stream, world_simulation_curr_frame);
         saturn_format_close_section(stream);
     }
     saturn_format_write((char*)(std::string("dynos/projects/") + filename).c_str(), stream);

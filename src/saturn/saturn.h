@@ -131,6 +131,7 @@ extern bool setting_mario_struct_pos;
 extern struct Object (*world_simulation_data)[960];
 extern int world_simulation_frames;
 extern float world_simulation_curr_frame;
+extern u16 world_simulation_seed;
 
 extern bool simulating_world;
 

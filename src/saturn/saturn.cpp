@@ -149,8 +149,10 @@ bool setting_mario_struct_pos = false;
 struct Object (*world_simulation_data)[960] = nullptr;
 int world_simulation_frames = 0;
 float world_simulation_curr_frame = 0;
+u16 world_simulation_seed = 0;
 
 extern struct Object gObjectPool[960];
+extern u16 gRandomSeed16;
 
 std::vector<Gfx*> gfxs = {};
 bool simulating_world = false;
@@ -168,6 +170,7 @@ void saturn_simulate(int frames) {
     world_simulation_frames = frames;
     world_simulation_data = (struct Object(*)[960])malloc(sizeof(*world_simulation_data) * frames);
     memcpy(world_simulation_data[0], gObjectPool, sizeof(*world_simulation_data));
+    world_simulation_seed = gRandomSeed16;
     for (int i = 1; i < frames; i++) {
         area_update_objects();
         Gfx* head = gDisplayListHead;
