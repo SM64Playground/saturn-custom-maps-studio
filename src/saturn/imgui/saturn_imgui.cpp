@@ -1,5 +1,6 @@
 #include "saturn_imgui.h"
 
+#include <filesystem>
 #include <ios>
 #include <string>
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <fstream>
 
 #include "game/area.h"
+#include "saturn/filesystem/saturn_embedded_filesystem.h"
 #include "saturn/imgui/saturn_imgui_file_browser.h"
 #include "saturn/imgui/saturn_imgui_dynos.h"
 #include "saturn/imgui/saturn_imgui_cc_editor.h"
@@ -930,6 +932,10 @@ void ImGui_ConditionalCheckbox(const char* label, bool* val, bool cond) {
     if (!cond) ImGui::EndDisabled();
 }
 
+std::vector<std::string> embedded_models = {};
+std::vector<std::string> embedded_anims = {};
+std::vector<std::string> embedded_eyes = {};
+
 void saturn_imgui_update() {
     if (!splash_finished) return;
 
@@ -967,12 +973,158 @@ void saturn_imgui_update() {
             bool in_custom_level = gCurrLevelNum == LEVEL_SA && gCurrAreaIndex == 3;
             if (in_custom_level) ImGui::BeginDisabled();
             if (ImGui::Button(ICON_FA_SAVE " Save###project_file_save")) {
-                saturn_save_project((char*)(std::string(saturnProjectFilename) + ".spj").c_str());
+                struct Folder   folder;
+                struct Folder* pFolder = nullptr;
+                if (!embedded_eyes.empty() || !embedded_models.empty() || !embedded_anims.empty()) {
+                    folder.type = 1;
+                    folder.entries = {};
+                    strncpy(folder.name, "dynos", 255);
+                    if (!embedded_models.empty()) {
+                        struct Folder models_folder;
+                        models_folder.type = 1;
+                        models_folder.entries = {};
+                        strncpy(models_folder.name, "packs", 255);
+                        for (std::string model : embedded_models) {
+                            models_folder.entries.push_back(saturn_embedded_filesystem_from_local_storage("dynos/packs/" + model));
+                        }
+                        folder.entries.push_back(*(struct FileEntry*)&models_folder);
+                    }
+                    if (!embedded_anims.empty()) {
+                        struct Folder anims_folder;
+                        anims_folder.type = 1;
+                        anims_folder.entries = {};
+                        strncpy(anims_folder.name, "anims", 255);
+                        for (std::string anim : embedded_anims) {
+                            std::filesystem::path path = std::filesystem::path("dynos/anims") / anim;
+                            struct File animfile;
+                            animfile.type = 0;
+                            animfile.data_length = std::filesystem::file_size(path);
+                            animfile.data = (unsigned char*)malloc(animfile.data_length);
+                            strncpy(animfile.name, anim.c_str(), 255);
+                            std::ifstream stream = std::ifstream(path);
+                            stream.read((char*)animfile.data, animfile.data_length);
+                            stream.close();
+                            anims_folder.entries.push_back(*(struct FileEntry*)&animfile);
+                        }
+                        folder.entries.push_back(*(struct FileEntry*)&anims_folder);
+                    }
+                    if (!embedded_eyes.empty()) {
+                        struct Folder eyes_folder;
+                        eyes_folder.type = 1;
+                        eyes_folder.entries = {};
+                        strncpy(eyes_folder.name, "eyes", 255);
+                        for (std::string eye : embedded_eyes) {
+                            std::filesystem::path path = std::filesystem::path("dynos/eyes") / eye;
+                            struct File eyefile;
+                            eyefile.type = 0;
+                            eyefile.data_length = std::filesystem::file_size(path);
+                            eyefile.data = (unsigned char*)malloc(eyefile.data_length);
+                            strncpy(eyefile.name, eye.c_str(), 255);
+                            std::ifstream stream = std::ifstream(path);
+                            stream.read((char*)eyefile.data, eyefile.data_length);
+                            stream.close();
+                            eyes_folder.entries.push_back(*(struct FileEntry*)&eyefile);
+                        }
+                        folder.entries.push_back(*(struct FileEntry*)&eyes_folder);
+                    }
+                    pFolder = &folder;
+                }
+                saturn_save_project((char*)(std::string(saturnProjectFilename) + ".spj").c_str(), pFolder);
+                saturn_embedded_filesystem_free((struct FileEntry*)pFolder);
                 saturn_load_project_list();
             }
             if (in_custom_level) ImGui::EndDisabled();
             ImGui::SameLine();
             imgui_bundled_help_marker("NOTE: Project files are currently EXPERIMENTAL and prone to crashing!");
+            if (ImGui::TreeNode("Embed Assets")) {
+                std::vector<std::string> available_models = {};
+                std::vector<std::string> available_anims = {};
+                std::vector<std::string> available_eyes = {};
+                for (int i = 0; i < saturn_actor_sizeof(); i++) {
+                    MarioActor* actor = saturn_get_actor(i);
+                    bool has_custom_eyes = true;
+                    if (actor->selected_model != -1) {
+                        if (!actor->model.UsingVanillaEyes()) has_custom_eyes = false;
+                        std::string model = actor->model.FolderName;
+                        if (std::find(available_models.begin(), available_models.end(), model) == available_models.end())
+                            available_models.push_back(model);
+                    }
+                    std::string atl = saturn_keyframe_get_mario_timeline_id("k_mario_anim", i);
+                    if (actor->animstate.custom) {
+                        std::string anim = canim_array[actor->animstate.id];
+                        if (std::find(available_anims.begin(), available_anims.end(), anim) == available_anims.end())
+                            available_anims.push_back(anim);
+                    }
+                    if (saturn_timeline_exists(atl.c_str())) {
+                        auto keyframes = k_frame_keys[atl].second;
+                        for (Keyframe kf : keyframes) {
+                            if (kf.value[0] < 1) continue; // isnt custom
+                            std::string anim = canim_array[kf.value[1]];
+                            if (std::find(available_anims.begin(), available_anims.end(), anim) == available_anims.end())
+                                available_anims.push_back(anim);
+                        }
+                    }
+                    if (has_custom_eyes) {
+                        std::string eye = actor->model.Expressions[0].Textures[actor->model.Expressions[0].CurrentIndex].DynosPath();
+                        if (std::find(available_eyes.begin(), available_eyes.end(), eye) == available_eyes.end())
+                            available_eyes.push_back(eye);
+                        std::string etl = saturn_keyframe_get_mario_timeline_id("k_mario_expr", i);
+                        if (saturn_timeline_exists(etl.c_str())) {
+                            auto keyframes = k_frame_keys[etl].second;
+                            for (Keyframe kf : keyframes) {
+                                eye = actor->model.Expressions[0].Textures[kf.value[0]].DynosPath();
+                                if (std::find(available_eyes.begin(), available_eyes.end(), eye) == available_eyes.end())
+                                    available_eyes.push_back(eye);
+                            }
+                        }
+                    }
+                }
+                if (ImGui::Button("Select All")) {
+                    embedded_models.clear();
+                    embedded_anims.clear();
+                    embedded_eyes.clear();
+                    for (std::string x : available_models) embedded_models.push_back(x);
+                    for (std::string x : available_anims ) embedded_anims .push_back(x);
+                    for (std::string x : available_eyes  ) embedded_eyes  .push_back(x);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Deselect All")) {
+                    embedded_models.clear();
+                    embedded_anims.clear();
+                    embedded_eyes.clear();
+                }
+                if (ImGui::TreeNode("Models")) {
+                    for (std::string model : available_models) {
+                        bool selected = std::find(embedded_models.begin(), embedded_models.end(), model) != embedded_models.end();
+                        if (ImGui::Checkbox(model.c_str(), &selected)) {
+                            if (selected) embedded_models.push_back(model);
+                            else embedded_models.erase(std::find(embedded_models.begin(), embedded_models.end(), model));
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Animations")) {
+                    for (std::string anim : available_anims) {
+                        bool selected = std::find(embedded_anims.begin(), embedded_anims.end(), anim) != embedded_anims.end();
+                        if (ImGui::Checkbox(anim.c_str(), &selected)) {
+                            if (selected) embedded_anims.push_back(anim);
+                            else embedded_anims.erase(std::find(embedded_anims.begin(), embedded_anims.end(), anim));
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Eyes")) {
+                    for (std::string eye : available_eyes) {
+                        bool selected = std::find(embedded_eyes.begin(), embedded_eyes.end(), eye) != embedded_eyes.end();
+                        if (ImGui::Checkbox(eye.c_str(), &selected)) {
+                            if (selected) embedded_eyes.push_back(eye);
+                            else embedded_eyes.erase(std::find(embedded_eyes.begin(), embedded_eyes.end(), eye));
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::TreePop();
+            }
             if (in_custom_level) ImGui::Text("Saving in a custom\nlevel isn't supported");
             ImGui::EndMenu();
         }

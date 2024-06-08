@@ -722,7 +722,7 @@ void saturn_update() {
     if (gCurrLevelNum != LEVEL_SA || gCurrAreaIndex != 3) {
         if (autosaveDelay <= 0) autosaveDelay = 30 * configAutosaveDelay;
         autosaveDelay--;
-        if (autosaveDelay == 0) saturn_save_project("autosave.spj");
+        if (autosaveDelay == 0) saturn_save_project("autosave.spj", nullptr);
     }
 }
 

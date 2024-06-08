@@ -8,6 +8,7 @@
 #include "saturn/imgui/saturn_imgui_chroma.h"
 #include "saturn/imgui/saturn_imgui_machinima.h"
 #include "saturn_format.h"
+#include "saturn_embedded_filesystem.h"
 
 #include "saturn/saturn.h"
 #include "saturn/saturn_actors.h"
@@ -294,6 +295,37 @@ bool saturn_project_simulation_handler(SaturnFormatStream* stream, int version) 
     return true;
 }
 
+struct FileEntry saturn_project_read_embedded_filesystem(SaturnFormatStream* stream) {
+    int type = saturn_format_read_int8(stream);
+    if (type == 0) {
+        struct File file;
+        file.type = type;
+        saturn_format_read_string(stream, file.name, 255);
+        file.data_length = saturn_format_read_int32(stream);
+        file.data = (unsigned char*)malloc(file.data_length);
+        saturn_format_read_any(stream, file.data, file.data_length);
+        return *(struct FileEntry*)&file;
+    }
+    else {
+        struct Folder folder;
+        folder.type = type;
+        saturn_format_read_string(stream, folder.name, 255);
+        int num_files = saturn_format_read_int32(stream);
+        for (int i = 0; i < num_files; i++) {
+            folder.entries.push_back(saturn_project_read_embedded_filesystem(stream));
+        }
+        return *(struct FileEntry*)&folder;
+    }
+}
+
+bool saturn_project_embedded_data_handler(SaturnFormatStream* stream, int version) {
+    struct FileEntry entry = saturn_project_read_embedded_filesystem(stream);
+    saturn_embedded_filesystem_to_local_storage(&entry, ".");
+    saturn_embedded_filesystem_free(&entry);
+    model_list = GetModelList("dynos/packs");
+    return true;
+}
+
 void saturn_load_project(char* filename) {
     k_frame_keys.clear();
     saturn_clear_actors();
@@ -307,6 +339,7 @@ void saturn_load_project(char* filename) {
         { "LEVL", saturn_project_level_handler },
         { "CANM", saturn_project_custom_anim_handler },
         { "WSIM", saturn_project_simulation_handler },
+        { "EMBD", saturn_project_embedded_data_handler },
     });
     for (int index : actors_for_deletion) {
         saturn_remove_actor(index);
@@ -317,7 +350,27 @@ void saturn_load_project(char* filename) {
     std::cout << "Loaded project " << filename << std::endl;
 }
 
-void saturn_save_project(char* filename) {
+void saturn_save_embedded_filesystem(SaturnFormatStream* stream, struct FileEntry* filesystem) {
+    if (!filesystem) return;
+    saturn_format_write_int8(stream, filesystem->type);
+    saturn_format_write_string(stream, filesystem->name);
+    struct File* file = (struct File*)filesystem;
+    struct Folder* folder = (struct Folder*)filesystem;
+    switch (filesystem->type) {
+        case 0: // file
+            saturn_format_write_int32(stream, file->data_length);
+            saturn_format_write_any(stream, file->data, file->data_length);
+            break;
+        case 1: // folder
+            saturn_format_write_int32(stream, folder->entries.size());
+            for (int i = 0; i < folder->entries.size(); i++) {
+                saturn_save_embedded_filesystem(stream, &folder->entries[i]);
+            }
+            break;
+    }
+}
+
+void saturn_save_project(char* filename, struct Folder* embedded_filesystem) {
     SaturnFormatStream _stream = saturn_format_output("SSPJ", SATURN_PROJECT_VERSION);
     SaturnFormatStream* stream = &_stream;
     saturn_format_new_section(stream, "LEVL");
@@ -329,6 +382,11 @@ void saturn_save_project(char* filename) {
     }
     saturn_format_write_int8(stream, acts);
     saturn_format_close_section(stream);
+    if (embedded_filesystem) {
+        saturn_format_new_section(stream, "EMBD");
+        saturn_save_embedded_filesystem(stream, (struct FileEntry*)embedded_filesystem);
+        saturn_format_close_section(stream);
+    }
     saturn_format_new_section(stream, "CANM");
     for (std::string canim : canim_array) {
         saturn_format_write_string(stream, canim.data());

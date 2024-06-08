@@ -13,7 +13,7 @@ extern "C" {
 #define SATURN_FORMAT_FINISH_IDENTIFIER "DONE"
 #define SATURN_FORMAT_BLOCK_SIZE        0x10
 #define SATURN_FORMAT_IDENTIFIER_LENGTH 0x04
-#define SATURN_FORMAT_MAX_CONTENT_SIZE  0x200000 // 2 MB, max 131072 blocks
+#define SATURN_FORMAT_MAX_CONTENT_SIZE  0x1000000 // 16 MB, max 1048576 blocks
 
 void align(SaturnFormatStream* stream) {
     int alignment = SATURN_FORMAT_BLOCK_SIZE - (stream->pointer % SATURN_FORMAT_BLOCK_SIZE);
