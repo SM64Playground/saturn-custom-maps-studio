@@ -9,7 +9,7 @@ struct FileEntry saturn_embedded_filesystem_from_local_storage(std::filesystem::
     if (std::filesystem::is_directory(path)) {
         struct Folder folder;
         folder.type = 1;
-        strncpy(folder.name, path.filename().c_str(), 255);
+        strncpy(folder.name, path.filename().string().c_str(), 255);
         folder.entries = {};
         for (auto entry : std::filesystem::directory_iterator(path)) {
             folder.entries.push_back(saturn_embedded_filesystem_from_local_storage(entry.path()));
@@ -19,7 +19,7 @@ struct FileEntry saturn_embedded_filesystem_from_local_storage(std::filesystem::
     else {
         struct File file;
         file.type = 0;
-        strncpy(file.name, path.filename().c_str(), 255);
+        strncpy(file.name, path.filename().string().c_str(), 255);
         file.data_length = std::filesystem::file_size(path);
         file.data = (unsigned char*)malloc(file.data_length);
         std::ifstream stream = std::ifstream(path, std::ios::binary);
