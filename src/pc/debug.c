@@ -161,7 +161,7 @@ static int _dladdr(void* addr, Dl_info* info, Symbol* symbols) {
     int return_code = dladdr(addr, info);
     if ((!return_code || !info->dli_sname) && symbols) {
         uintptr_t offset = (uintptr_t)symbols->addr;
-        uintptr_t symbol_addr = addr - offset;
+        uintptr_t symbol_addr = (uintptr_t)(addr - offset);
         uintptr_t closest = UINTPTR_MAX;
         Symbol* head = symbols->next;
         while (head) {
@@ -293,7 +293,11 @@ static void crash_handler(int signal, siginfo_t* info, ucontext_t* context)
 #endif
     close_logger();
     exit(1);
+#ifdef _WIN32
+    return 0;
+#else
     return;
+#endif
 }
 
 void init_crash_handler() {
