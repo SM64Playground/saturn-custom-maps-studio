@@ -209,6 +209,7 @@ extern int autosaveDelay;
 
 extern Vec3f stored_mario_pos;
 extern Vec3s stored_mario_angle;
+extern void saturn_clear_simulation();
 extern void saturn_simulate(int);
 extern void saturn_copy_camera(bool);
 extern void saturn_paste_camera(void);

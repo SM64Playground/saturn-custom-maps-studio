@@ -161,12 +161,18 @@ void saturn_add_alloc_dl(Gfx* gfx) {
     gfxs.push_back(gfx);
 }
 
+void saturn_clear_simulation() {
+    if (!world_simulation_data) return;
+    memcpy(gObjectPool, world_simulation_data[0], sizeof(*world_simulation_data));
+    free(world_simulation_data);
+    world_simulation_frames = 0;
+    world_simulation_curr_frame = 0;
+    world_simulation_data = nullptr;
+}
+
 void saturn_simulate(int frames) {
     simulating_world = true;
-    if (world_simulation_data) {
-        memcpy(gObjectPool, world_simulation_data[0], sizeof(*world_simulation_data));
-        free(world_simulation_data);
-    }
+    saturn_clear_simulation();
     world_simulation_frames = frames;
     world_simulation_data = (struct Object(*)[960])malloc(sizeof(*world_simulation_data) * frames);
     memcpy(world_simulation_data[0], gObjectPool, sizeof(*world_simulation_data));

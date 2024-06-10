@@ -329,6 +329,7 @@ bool saturn_project_embedded_data_handler(SaturnFormatStream* stream, int versio
 void saturn_load_project(char* filename) {
     k_frame_keys.clear();
     saturn_clear_actors();
+    saturn_clear_simulation();
     actors_for_deletion.clear();
     current_project = filename;
     saturn_format_input((char*)(std::string("dynos/projects/") + filename).c_str(), "SSPJ", {
