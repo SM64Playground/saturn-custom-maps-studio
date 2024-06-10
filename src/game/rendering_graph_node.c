@@ -1322,6 +1322,12 @@ static void geo_process_object_parent(struct GraphNodeObjectParent *node) {
     if (node->node.children != NULL) {
         geo_process_node_and_siblings(node->node.children);
     }
+    for (int i = 0; i < saturn_actor_sizeof(); i++) {
+        struct Object* obj = saturn_actor_get_object(i);
+        if (!obj) continue;
+        if (!obj->header.gfx.sharedChild) continue;
+        geo_process_object(obj);
+    }
 }
 
 /**
