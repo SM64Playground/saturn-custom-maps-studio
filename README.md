@@ -17,10 +17,14 @@ Donate to sm64rise, the creator of Saturn, [here](https://ko-fi.com/J3J05B5WR).
   - [x] Keyframing
   - [x] Misc settings
   - [x] In-game bone editor
+  - [x] Set the model to an in-game object
 - [X] Input recording/playback
 - [x] Recording transparent .webm videos (or .png sequences) directly in the editor
 - [x] Capturing transparent screenshots
 - [x] Mouse-based camera controls
+- [x] Detachable camera
+- [x] Orthographic renderer
+- [x] Ability to simulate the world
 
 ### Controls
 
