@@ -36,6 +36,7 @@ extern "C" {
 #include "audio/external.h"
 #include "engine/surface_collision.h"
 #include "game/object_collision.h"
+#include "game/object_list_processor.h"
 }
 
 bool mario_exists;
@@ -177,7 +178,17 @@ void saturn_simulate(int frames) {
     world_simulation_data = (struct Object(*)[960])malloc(sizeof(*world_simulation_data) * frames);
     memcpy(world_simulation_data[0], gObjectPool, sizeof(*world_simulation_data));
     world_simulation_seed = gRandomSeed16;
+    Vec3f prevMarioStructPos;
+    float prevMarioStructAngle = gMarioState->fAngle;
+    vec3f_copy(prevMarioStructPos, gMarioState->pos);
     for (int i = 1; i < frames; i++) {
+        saturn_keyframe_apply("k_mariostruct_x", i);
+        saturn_keyframe_apply("k_mariostruct_y", i);
+        saturn_keyframe_apply("k_mariostruct_z", i);
+        saturn_keyframe_apply("k_mariostruct_angle", i);
+        gMarioObject->oPosX = gMarioState->pos[0];
+        gMarioObject->oPosY = gMarioState->pos[1];
+        gMarioObject->oPosZ = gMarioState->pos[2];
         area_update_objects();
         Gfx* head = gDisplayListHead;
         geo_process_root(gCurrentArea->unk04, NULL, NULL, 0);
@@ -189,6 +200,8 @@ void saturn_simulate(int frames) {
         memcpy(world_simulation_data[i], gObjectPool, sizeof(*world_simulation_data));
     }
     simulating_world = false;
+    vec3f_copy(gMarioState->pos, prevMarioStructPos);
+    gMarioState->fAngle = prevMarioStructAngle;
 }
 
 extern "C" {
@@ -765,6 +778,8 @@ float saturn_keyframe_setup_interpolation(std::string id, int frame, int* keyfra
 
 // applies the values from keyframes to its destination, returns true if its the last frame, false if otherwise
 bool saturn_keyframe_apply(std::string id, int frame) {
+    if (!saturn_timeline_exists(id.c_str())) return true;
+
     KeyframeTimeline timeline = k_frame_keys[id].first;
     std::vector<Keyframe> keyframes = k_frame_keys[id].second;
 
