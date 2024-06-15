@@ -27,7 +27,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: saturn-${{ github.run_number }}-${{ github.job }}
-        path: D:\a\Saturn\Saturn\build\us_pc\
+        path: D:\a\saturn-studio\saturn-studio\build\us_pc\
 
   linux:
     name: Linux
@@ -49,4 +49,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: saturn-${{ github.run_number }}-${{ github.job }}
-        path: /home/runner/work/Saturn/Saturn/build/us_pc
+        path: /home/runner/work/saturn-studio/saturn-studio/build/us_pc

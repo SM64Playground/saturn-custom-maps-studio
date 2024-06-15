@@ -192,6 +192,7 @@ void warp_to_level(int level, int area, int act = -1) {
     DynOS_Warp_ToWarpNode(levelID, area, act, warpnode);
 
     saturn_clear_actors();
+    saturn_clear_simulation();
 }
 
 int get_saturn_level_id(int level) {

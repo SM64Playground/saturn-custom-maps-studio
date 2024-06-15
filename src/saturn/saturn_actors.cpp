@@ -29,7 +29,6 @@ MarioActor::MarioActor() {
     marioObj = (struct Object*)malloc(sizeof(struct Object));
     memset(marioObj, 0, sizeof(struct Object));
     geo_reset_object_node(&marioObj->header.gfx);
-    geo_add_child(&gObjParentGraphNode, &marioObj->header.gfx.node);
     initialize_object(marioObj);
     geo_obj_init((struct GraphNodeObject*)&marioObj->header.gfx, gLoadedGraphNodes[MODEL_MARIO], gVec3fZero, gVec3sZero);
     marioObj->behavior = marioObj->curBhvCommand = bhvMarioActor;
@@ -129,7 +128,6 @@ void saturn_remove_actor(int index) {
     actorptr->exists = false;
     delete_mario_actor_timelines(index);
     actorptr->marioObj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
-    geo_remove_child(&actorptr->marioObj->header.gfx.node);
     free(actorptr->marioObj);
 }
 
