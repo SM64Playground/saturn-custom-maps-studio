@@ -619,6 +619,7 @@ std::vector<s16> sampling_indices = {};
 
 void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
     if (!sampling) actor->custom_bone = false;
+    bool should_update_sample = false;
     if (ImGui::BeginTabBar("###anim_tab_bar")) {
         if (ImGui::BeginTabItem("SM64")) {
             ImGui::PushItemWidth(316);
@@ -641,6 +642,7 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                             sampling_anim_loaded = true;
                             sampling_animation = anim.second(anim.first);
                             sampling_frame = 0;
+                            should_update_sample = true;
                         }
                         else {
                             actor->animstate.id = i;
@@ -679,6 +681,7 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     sampling_animation.values = sampling_values.data();
                     sampling_animation.index = (const u16*)sampling_indices.data();
                     sampling_animation.length = (s16)length;
+                    should_update_sample = true;
                 }
                 else {
                     actor->animstate.id = std::find(canim_array.begin(), canim_array.end(), path) - canim_array.begin();
@@ -756,8 +759,8 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
     if (actor->custom_bone && !sampling) return;
     ImGui::Separator();
     if (sampling) {
-        if (!ImGui::SliderFloat("Frame", &sampling_frame, 0, sampling_animation.unk08 - 1, "%.0f")) return;
-        if (!sampling_anim_loaded) return;
+        if (ImGui::SliderFloat("Frame", &sampling_frame, 0, sampling_animation.unk08 - 1, "%.0f")) should_update_sample = true;
+        if (!sampling_anim_loaded || !should_update_sample) return;
         const u16* curindex = sampling_animation.index;
         curindex += 6;
         for (int i = 0; i < 20; i++) {
