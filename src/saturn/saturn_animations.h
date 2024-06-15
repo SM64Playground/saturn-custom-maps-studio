@@ -30,6 +30,7 @@ extern void saturn_load_anim_folder(std::string, int*);
 extern void saturn_play_custom_animation();
 extern void saturn_run_chainer();
 extern void load_animation(struct Animation* out, int index);
+extern void saturn_sample_animation(MarioActor* actor, struct Animation* anim, int frame);
 
 #endif
 

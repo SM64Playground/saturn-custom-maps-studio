@@ -761,17 +761,7 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
     if (sampling) {
         if (ImGui::SliderFloat("Frame", &sampling_frame, 0, sampling_animation.unk08 - 1, "%.0f")) should_update_sample = true;
         if (!sampling_anim_loaded || !should_update_sample) return;
-        const u16* curindex = sampling_animation.index;
-        curindex += 6;
-        for (int i = 0; i < 20; i++) {
-            for (int j = 0; j < 3; j++) {
-                int valindex = 0;
-                if (sampling_frame < curindex[0]) valindex = curindex[1] + sampling_frame;
-                else valindex = curindex[1] + curindex[0] - 1;
-                curindex += 2;
-                actor->bones[i][j] = (float)(sampling_animation.values[valindex]) * 360.f / 65536.f;
-            }
-        }
+        saturn_sample_animation(actor, &sampling_animation, sampling_frame);
         return;
     }
     ImGui::SliderFloat("Frame", &actor->animstate.frame, 0, actor->animstate.length - 1, "%.0f");

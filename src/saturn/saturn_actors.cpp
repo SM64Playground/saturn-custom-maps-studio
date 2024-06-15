@@ -38,7 +38,9 @@ MarioActor::MarioActor() {
     scaler[0][0] = scaler[0][1] = scaler[0][2] =
     scaler[1][0] = scaler[1][1] = scaler[1][2] =
     scaler[2][0] = scaler[2][1] = scaler[2][2] = 1;
-    memset(bones, 0, sizeof(bones));
+    struct Animation anim;
+    load_animation(&anim, MARIO_ANIM_A_POSE);
+    saturn_sample_animation(this, &anim, 0);
 }
 
 void delete_mario_actor_timelines(int index) {
