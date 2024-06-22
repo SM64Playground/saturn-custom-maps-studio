@@ -20,7 +20,7 @@ static bool audio_sdl_init(void) {
     want.samples = 512;
     want.callback = NULL;
     int numDevices = SDL_GetNumAudioDevices(0);
-    if (numDevices == 0) return;
+    if (numDevices == 0) return false;
     dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
     if (dev == 0) {
         fprintf(stderr, "SDL_OpenAudio error: %s\n", SDL_GetError());
