@@ -9,6 +9,7 @@
 #include <fstream>
 
 #include "game/area.h"
+#include "object_constants.h"
 #include "saturn/filesystem/saturn_embedded_filesystem.h"
 #include "saturn/imgui/saturn_imgui_file_browser.h"
 #include "saturn/imgui/saturn_imgui_dynos.h"
@@ -36,6 +37,7 @@
 #include "saturn/saturn_json.h"
 #include "saturn/saturn_video_renderer.h"
 #include "saturn/saturn_version.h"
+#include "types.h"
 
 #include <SDL2/SDL.h>
 
@@ -80,6 +82,7 @@ extern "C" {
 #include "engine/level_script.h"
 #include "game/object_list_processor.h"
 #include "pc/pngutils.h"
+#include "game/object_helpers.h"
 }
 
 using namespace std;
@@ -552,6 +555,7 @@ void saturn_imgui_create_dockspace_layout(ImGuiID dockspace) {
         visible_windows.insert({ "Settings", true });
         visible_windows.insert({ "Game", true });
         visible_windows.insert({ "Timeline###kf_timeline", true });
+        visible_windows.insert({ "Objects", true });
         saturn_load_window_visibility("windows.bin", &visible_windows);
     }
     if (imgui_config_exists) return;
@@ -564,6 +568,7 @@ void saturn_imgui_create_dockspace_layout(ImGuiID dockspace) {
     ImGui::DockBuilderSplitNode(up, ImGuiDir_Left, 0.25f, &left, &right);
     ImGui::DockBuilderDockWindow("Machinima", left);
     ImGui::DockBuilderDockWindow("Marios", left);
+    ImGui::DockBuilderDockWindow("Objects", left);
     ImGui::DockBuilderDockWindow("Settings", left);
     ImGui::DockBuilderDockWindow("Game", right);
     ImGui::DockBuilderDockWindow("Timeline###kf_timeline", down);
@@ -936,6 +941,10 @@ void ImGui_ConditionalCheckbox(const char* label, bool* val, bool cond) {
 std::vector<std::string> embedded_models = {};
 std::vector<std::string> embedded_anims = {};
 std::vector<std::string> embedded_eyes = {};
+
+extern s8 sObjectListUpdateOrder[];
+
+int num_objects_as_actors = 0;
 
 void saturn_imgui_update() {
     if (!splash_finished) return;
@@ -1417,6 +1426,49 @@ void saturn_imgui_update() {
             actor = actor->next;
             i++;
         }
+        ImGui::End();
+    }
+
+    if (saturn_imgui_window("Objects")) {
+        if (world_simulation_data) {
+            ImGui::Text("A simulation is active");
+            ImGui::Separator();
+        }
+        ImGui::BeginDisabled(world_simulation_data);
+        bool any_objects = false;
+        int iter = 0;
+        for (int index, i = 0; (index = sObjectListUpdateOrder[i]) != -1; i++) {
+            struct ObjectNode* list = &gObjectLists[index];
+            struct ObjectNode* curr = list->next;
+            while (list != curr) {
+                struct Object* obj = (struct Object*)curr;
+                if (!(obj->header.gfx.node.flags & GRAPH_RENDER_INVISIBLE)) for (int modelID : saturn_iterable_obj_list) {
+                    if (obj->header.gfx.sharedChild == gLoadedGraphNodes[modelID]) {
+                        if (ImGui::Selectable((saturn_object_names[modelID] + "###model_id_" + std::to_string(iter++)).c_str())) {
+                            enum ModelID prev_mario_model = current_mario_model;
+                            current_mario_model = (enum ModelID)modelID;
+                            MarioActor* actor = saturn_spawn_actor(obj->oPosX, obj->oPosY, obj->oPosZ);
+                            current_mario_model = prev_mario_model;
+                            actor->angle = obj->oFaceAngleYaw;
+                            actor->obj_model = (enum ModelID)modelID;
+                            std::string name = saturn_object_names[modelID] + " Object " + std::to_string(++num_objects_as_actors);
+                            memcpy(actor->name, name.c_str(), name.length() + 1);
+                            struct Object* currobj = gCurrentObject;
+                            gCurrentObject = obj;
+                            cur_obj_hide();
+                            gCurrentObject = currobj;
+                        }
+                        if (ImGui::IsItemHovered()) obj->oFlags |= OBJ_FLAG_IS_SELECTED;
+                        else obj->oFlags &= ~OBJ_FLAG_IS_SELECTED;
+                        any_objects = true;
+                        break;
+                    }
+                }
+                curr = curr->next;
+            }
+        }
+        if (!any_objects) ImGui::Text("There aren't any objects\nyou can create actors from\nin this level.");
+        ImGui::EndDisabled();
         ImGui::End();
     }
 

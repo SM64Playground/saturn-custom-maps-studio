@@ -45,6 +45,7 @@ extern "C" {
 #include "include/behavior_data.h"
 #include "game/object_helpers.h"
 #include "game/custom_level.h"
+#include "game/object_list_processor.h"
 }
 
 #include "saturn/saturn_json.h"
@@ -519,7 +520,7 @@ void imgui_machinima_quick_options() {
 
         ImGui::EndMenu();
     }
-    
+
     ImGui::InputInt("###simulation_frames", &frames_to_simulate, 1, 10);
     ImGui::SameLine();
     if (ImGui::Button("Simulate")) {
@@ -527,6 +528,11 @@ void imgui_machinima_quick_options() {
         saturn_simulate(frames_to_simulate);
         world_simulation_curr_frame = 0;
         if (saturn_timeline_exists("k_worldsim_frame")) k_frame_keys.erase("k_worldsim_frame");
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!world_simulation_data);
+    if (ImGui::Button(ICON_FK_TRASH)) {
+        saturn_clear_simulation();
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -543,7 +549,6 @@ void imgui_machinima_quick_options() {
         else ImGui::Text("Memory Usage: %.2f %s", fraction / 1024.f + bytes, units[unitIndex]);
         ImGui::EndTooltip();
     }
-    ImGui::BeginDisabled(!world_simulation_data);
     int frame = world_simulation_curr_frame;
     if (ImGui::SliderInt("Simulation Frame", &frame, 0, world_simulation_frames - 1, "%d", ImGuiSliderFlags_AlwaysClamp)) {
         world_simulation_curr_frame = frame;
