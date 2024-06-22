@@ -375,7 +375,7 @@ Gfx *geo_switch_mario_eyes(s32 callContext, struct GraphNode *node, UNUSED Mat4 
     if (callContext == GEO_CONTEXT_RENDER) {
         s16 eye = saturn_actor_geo_switch(ACTOR_SWITCH_EYE);
         if (eye == 0) { // force_blink
-            blinkFrame = ((switchCase->numCases * 32 + gAreaUpdateCounter) >> 1) & 0x1F;
+            blinkFrame = ((switchCase->numCases * 32 + gGlobalTimer) >> 1) & 0x1F;
             if (blinkFrame < 7) {
                 switchCase->selectedCase = gMarioBlinkAnimation[blinkFrame];
             } else {
