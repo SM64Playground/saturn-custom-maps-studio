@@ -35,6 +35,7 @@
 #include "saturn/filesystem/saturn_windowfile.h"
 #include "saturn/saturn_json.h"
 #include "saturn/saturn_video_renderer.h"
+#include "saturn/saturn_version.h"
 
 #include <SDL2/SDL.h>
 
@@ -1493,17 +1494,16 @@ void saturn_imgui_update() {
                     }
                     ImGui::EndMenu();
                 }
-                ImGui::Text(PLATFORM_ICON);
+                ImGui::Text(PLATFORM_ICON " " SATURN_VERSION "     ");
                 if (configFps60) ImGui::TextDisabled("%.1f FPS (%.3f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
                 else ImGui::TextDisabled("%.1f FPS (%.3f ms/frame)", ImGui::GetIO().Framerate / 2, 1000.0f / (ImGui::GetIO().Framerate / 2));
                 ImGui::Text("     ");
 #ifdef GIT_BRANCH
 #ifdef GIT_HASH
-                ImGui::TextDisabled(ICON_FK_GITHUB " " GIT_BRANCH " " GIT_HASH);
+                ImGui::TextDisabled(ICON_FK_GITHUB " " GIT_BRANCH " " GIT_HASH "     ");
 #endif
 #endif
                 if (is_recording) {
-                    ImGui::SameLine(450);
                     if (ImGui::BeginMenu("Input Recording")) {
                         ImGui::PushItemWidth(150);
                         ImGui::SliderFloat(ICON_FK_SKATE " Walkpoint###run_speed", &run_speed, 0.f, 127.f, "%.0f");
