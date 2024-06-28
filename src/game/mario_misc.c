@@ -423,9 +423,11 @@ Gfx *geo_mario_tilt_torso(s32 callContext, struct GraphNode *node, UNUSED Mat4 *
             && action != ACT_RIDING_SHELL_GROUND) {
             vec3s_copy(bodyState->torsoAngle, gVec3sZero);
         }
-        rotNode->rotation[0] = 0;
-        rotNode->rotation[1] = 0;
-        rotNode->rotation[2] = 0;
+        Vec3s tilt;
+        saturn_rotate_torso(tilt);
+        rotNode->rotation[0] = tilt[1];
+        rotNode->rotation[1] = tilt[2];
+        rotNode->rotation[2] = tilt[0];
     }
     return NULL;
 }
@@ -450,6 +452,9 @@ Gfx *geo_mario_head_rotation(s32 callContext, struct GraphNode *node, UNUSED Mat
             rotNode->rotation[1] = bodyState->headAngle[2];
             rotNode->rotation[2] = bodyState->headAngle[0];
         }
+        Vec3s extra;
+        saturn_rotate_head(extra);
+        vec3s_add(rotNode->rotation, extra);
     }
     return NULL;
 }
