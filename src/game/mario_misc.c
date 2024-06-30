@@ -452,6 +452,7 @@ Gfx *geo_mario_head_rotation(s32 callContext, struct GraphNode *node, UNUSED Mat
             rotNode->rotation[1] = bodyState->headAngle[2];
             rotNode->rotation[2] = bodyState->headAngle[0];
         }
+        else vec3s_set(rotNode->rotation, 0, 0, 0);
         Vec3s extra;
         saturn_rotate_head(extra);
         vec3s_add(rotNode->rotation, extra);
