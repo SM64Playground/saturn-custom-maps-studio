@@ -38,6 +38,7 @@
 #include "saturn/saturn_video_renderer.h"
 #include "saturn/saturn_version.h"
 #include "types.h"
+#include "ffmpeg4.4/libavcodec/avcodec.h"
 
 #include <SDL2/SDL.h>
 
@@ -460,24 +461,24 @@ void saturn_capture_screenshot() {
     if (!capturing_video) return;
     if (video_timer-- > 0) return;
     capturing_video = false;
-    int in_width = videores[0] * (video_antialias + 1) + video_antialias;
-    int in_height = videores[0] * (video_antialias + 1) + video_antialias;
-    int in_size = (int)in_width * (int)in_height * 4;
-    int out_size = (int)videores[0] * (int)videores[1] * 4;
+    uint64_t in_width = videores[0] * (video_antialias + 1) + video_antialias;
+    uint64_t in_height = videores[0] * (video_antialias + 1) + video_antialias;
+    uint64_t in_size = (uint64_t)in_width * (uint64_t)in_height * 4;
+    uint64_t out_size = (uint64_t)videores[0] * (uint64_t)videores[1] * 4;
     unsigned char* image = (unsigned char*)malloc(in_size);
     unsigned char* flipped = (unsigned char*)malloc(out_size);
     glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)framebuffer);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     glBindTexture(GL_TEXTURE_2D, 0);
-    for (int y = 0; y < videores[1]; y++) {
-        for (int x = 0; x < videores[0]; x++) {
-            int i = (y * in_width + x) * 4;
-            int j = ((videores[1] - y - 1) * videores[0] + x) * 4;
+    for (uint64_t y = 0; y < videores[1]; y++) {
+        for (uint64_t x = 0; x < videores[0]; x++) {
+            uint64_t i = (y * in_width + x) * 4;
+            uint64_t j = ((videores[1] - y - 1) * videores[0] + x) * 4;
             int r = 0, g = 0, b = 0, a = 0;
             if (video_antialias) {
                 for (int X = 0; X <= 2; X++) {
                     for (int Y = 0; Y <= 2; Y++) {
-                        int I = ((Y + y * 2) * in_height + (X + x * 2)) * 4;
+                        uint64_t I = ((Y + y * 2) * in_height + (X + x * 2)) * 4;
                         r += image[I + 0];
                         g += image[I + 1];
                         b += image[I + 2];

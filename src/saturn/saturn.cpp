@@ -733,8 +733,10 @@ void saturn_update() {
 
     if (current_project != "") saturn_load_project((char*)current_project.c_str());
 
-    if (world_simulation_data) 
+    if (world_simulation_data) {
         memcpy(gObjectPool, world_simulation_data[(int)world_simulation_curr_frame], sizeof(*world_simulation_data));
+        gAreaUpdateCounter = world_simulation_curr_frame;
+    }
 
     // Autosave
 
