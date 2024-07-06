@@ -533,6 +533,7 @@ void imgui_machinima_quick_options() {
     ImGui::BeginDisabled(!world_simulation_data);
     if (ImGui::Button(ICON_FK_TRASH)) {
         saturn_clear_simulation();
+        if (saturn_timeline_exists("k_worldsim_frame")) k_frame_keys.erase("k_worldsim_frame");
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();

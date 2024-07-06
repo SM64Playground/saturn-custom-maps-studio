@@ -172,8 +172,9 @@ void saturn_clear_simulation() {
 }
 
 void saturn_simulate(int frames) {
-    simulating_world = true;
     saturn_clear_simulation();
+    if (frames <= 0) return;
+    simulating_world = true;
     world_simulation_frames = frames;
     world_simulation_data = (struct Object(*)[960])malloc(sizeof(*world_simulation_data) * frames);
     memcpy(world_simulation_data[0], gObjectPool, sizeof(*world_simulation_data));
