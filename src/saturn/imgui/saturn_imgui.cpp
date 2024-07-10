@@ -38,7 +38,6 @@
 #include "saturn/saturn_video_renderer.h"
 #include "saturn/saturn_version.h"
 #include "types.h"
-#include "ffmpeg4.4/libavcodec/avcodec.h"
 
 #include <SDL2/SDL.h>
 
