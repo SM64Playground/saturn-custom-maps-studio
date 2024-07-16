@@ -368,6 +368,7 @@ void sdynos_imgui_menu(int index) {
             ImGui::BeginDisabled();
             ImGui::Text("%s to stop", translate_bind_to_name(configKeyStopInpRec[0]));
             ImGui::EndDisabled();
+            ImGui::Checkbox("Keep Angle", &inprec_keep_angle);
             ImGui::Separator();
             if (empty) ImGui::BeginDisabled();
             bool checked = !empty && actor->playback_input;
