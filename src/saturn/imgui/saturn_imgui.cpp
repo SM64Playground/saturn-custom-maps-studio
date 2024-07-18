@@ -1378,6 +1378,7 @@ void saturn_imgui_update() {
             if (nearest_index != -1) saturn_imgui_open_mario_menu(nearest_index);
         }
         if (ImGui::BeginMenu("Mario Struct")) {
+            extern bool mstruct_hidden;
             ImGui::PushItemWidth(50);
             ImGui::DragFloat("###mariostruct_x", gMarioState->pos + 0, 1.f, 0.f, 0.f, "X");
             ImGui::SameLine();
@@ -1390,6 +1391,7 @@ void saturn_imgui_update() {
             ImGui::DragFloat("Angle###mariostruct_angle", &gMarioState->fAngle, 128.f);
             ImGui::PopItemWidth();
             saturn_keyframe_popout("k_mariostruct_angle");
+            ImGui::Checkbox("Hidden", &mstruct_hidden);
             ImGui::Separator();
             if (ImGui::MenuItem("Set Position and Angle")) {
                 setting_mario_struct_pos = true;
