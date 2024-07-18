@@ -131,6 +131,7 @@ void schroma_imgui_update() {
                 int c;
                 unsigned char* img = pngutils_read_png(str[0].c_str(), &imageref.width, &imageref.height, &c, 4);
                 pngutils_free(img);
+                gfx_precache_textures();
             }
         }
         ImGui::SameLine();
