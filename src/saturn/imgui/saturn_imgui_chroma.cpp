@@ -121,7 +121,7 @@ void schroma_imgui_update() {
     ImGui::Checkbox("Reference Image", &use_imageref);
     if (use_imageref) {
         if (ImGui::Button("Browse")) {
-            std::vector<std::string> str = choose_file_dialog("Open Image", { "*.png", "PNG image" }, false);
+            std::vector<std::string> str = choose_file_dialog("Open Image", { "PNG image", "*.png", "All Files", "*" }, false);
             if (str.size() != 0) {
                 std::filesystem::path dest = std::filesystem::path(sys_user_path()) / "res" / "gfx" / "_IMAGEREF.rgba32.png";
                 if (std::filesystem::exists(dest)) std::filesystem::remove(dest);
