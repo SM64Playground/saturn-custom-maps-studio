@@ -524,22 +524,15 @@ void imgui_machinima_quick_options() {
     ImGui::InputInt("###simulation_frames", &frames_to_simulate, 1, 10);
     ImGui::SameLine();
     if (ImGui::Button("Simulate")) {
-        gRandomSeed16 = world_simulation_seed;
         saturn_simulate(frames_to_simulate);
         world_simulation_curr_frame = 0;
-        if (saturn_timeline_exists("k_worldsim_frame")) k_frame_keys.erase("k_worldsim_frame");
-    }
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!world_simulation_data);
-    if (ImGui::Button(ICON_FK_TRASH)) {
-        saturn_clear_simulation();
         if (saturn_timeline_exists("k_worldsim_frame")) k_frame_keys.erase("k_worldsim_frame");
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         const char* units[] = { "B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
         int unitIndex = 0;
-        size_t bytes = sizeof(gObjectPool) * frames_to_simulate;
+        size_t bytes = sizeof(gObjectPool) * ceil(frames_to_simulate / (float)configWorldSimSamplePeriod);
         int fraction = 0;
         while (unitIndex < sizeof(units) / sizeof(*units) && bytes >= 1024) {
             unitIndex++;
@@ -549,6 +542,12 @@ void imgui_machinima_quick_options() {
         if (fraction == 0) ImGui::Text("Memory Usage: %ld %s", bytes, units[unitIndex]);
         else ImGui::Text("Memory Usage: %.2f %s", fraction / 1024.f + bytes, units[unitIndex]);
         ImGui::EndTooltip();
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!world_simulation_data);
+    if (ImGui::Button(ICON_FK_TRASH)) {
+        saturn_clear_simulation();
+        if (saturn_timeline_exists("k_worldsim_frame")) k_frame_keys.erase("k_worldsim_frame");
     }
     int frame = world_simulation_curr_frame;
     if (ImGui::SliderInt("Simulation Frame", &frame, 0, world_simulation_frames - 1, "%d", ImGuiSliderFlags_AlwaysClamp)) {

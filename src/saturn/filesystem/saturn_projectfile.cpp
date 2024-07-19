@@ -535,7 +535,7 @@ void saturn_save_project(char* filename, struct Folder* embedded_filesystem) {
     }
     if (world_simulation_data) {
         saturn_format_new_section(stream, "WSIM");
-        saturn_format_write_int16(stream, world_simulation_seed);
+        saturn_format_write_int16(stream, world_simulation_seeds[0]);
         saturn_format_write_int16(stream, world_simulation_frames);
         saturn_format_write_int16(stream, world_simulation_curr_frame);
         saturn_format_close_section(stream);

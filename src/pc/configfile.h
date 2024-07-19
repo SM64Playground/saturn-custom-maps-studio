@@ -74,6 +74,7 @@ extern bool         configNoWater;
 extern bool         configCUpLimit;
 extern unsigned int configEditorThemeJson;
 extern unsigned int configEditorTextures;
+extern unsigned int configWorldSimSamplePeriod;
 extern float        camera_fov;
 extern bool         configUnstableFeatures;
 #ifdef BETTERCAMERA
