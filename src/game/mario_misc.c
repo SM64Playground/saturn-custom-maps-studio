@@ -456,6 +456,7 @@ Gfx *geo_mario_head_rotation(s32 callContext, struct GraphNode *node, UNUSED Mat
         Vec3s extra;
         saturn_rotate_head(extra);
         vec3s_add(rotNode->rotation, extra);
+        vec3s_copy(rotNode->prevRotation, rotNode->rotation);
     }
     return NULL;
 }
