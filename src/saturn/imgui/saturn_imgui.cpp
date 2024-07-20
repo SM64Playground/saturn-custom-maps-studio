@@ -1167,7 +1167,7 @@ void saturn_imgui_update() {
                 if (ImGui::BeginMenu("Options###camera_options")) {
                     camera_savestate_mult = 0.f;
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-                    ImGui::BeginChild("###model_metadata", ImVec2(200, 90), true, ImGuiWindowFlags_NoScrollbar);
+                    ImGui::BeginChild("###model_metadata", ImVec2(250, 90), true, ImGuiWindowFlags_NoScrollbar);
                     float *pos, *yaw, *pitch;
                     if (gIsCameraMounted) {
                         pos = freezecamPos;
