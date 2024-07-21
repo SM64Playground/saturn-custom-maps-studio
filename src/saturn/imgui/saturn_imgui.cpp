@@ -9,6 +9,7 @@
 #include <fstream>
 
 #include "game/area.h"
+#include "model_ids.h"
 #include "object_constants.h"
 #include "saturn/filesystem/saturn_embedded_filesystem.h"
 #include "saturn/imgui/saturn_imgui_file_browser.h"
@@ -128,6 +129,33 @@ std::vector<std::string> textures_list = {};
 float game_viewport[4] = { 0, 0, -1, -1 };
 
 bool request_mario_tab = false;
+
+int sel_category = 0;
+std::vector<std::pair<const char*, std::vector<int>>> obj_categories = {
+    { "Enemies", {
+        MODEL_GOOMBA, MODEL_KOOPA_WITH_SHELL, MODEL_KOOPA_WITHOUT_SHELL,
+        MODEL_BLACK_BOBOMB, MODEL_KING_BOBOMB, MODEL_WHOMP, MODEL_ENEMY_LAKITU,
+        MODEL_UNAGI, MODEL_SNUFIT, MODEL_BUBBA, MODEL_FLYGUY, MODEL_FWOOSH,
+        MODEL_BOO, MODEL_BOO_CASTLE, MODEL_MONTY_MOLE, MODEL_MONEYBAG,
+        MODEL_MR_BLIZZARD, MODEL_MR_BLIZZARD_HIDDEN, MODEL_POKEY_BODY_PART,
+        MODEL_POKEY_HEAD, MODEL_SCUTTLEBUG, MODEL_BULLY, MODEL_BULLY_BOSS,
+        MODEL_CHILL_BULLY, MODEL_BIG_CHILL_BULLY, MODEL_CHUCKYA,
+        MODEL_BOWSER, MODEL_BOWSER2, MODEL_PIRANHA_PLANT, MODEL_SPINY,
+        MODEL_SPINDRIFT, MODEL_BUB, MODEL_SUSHI, MODEL_SKEETER,
+        MODEL_HEAVE_HO, MODEL_AMP, MODEL_MR_I, MODEL_MR_I_IRIS,
+    }},
+    { "Coins", {
+        MODEL_YELLOW_COIN, MODEL_YELLOW_COIN_NO_SHADOW,
+        MODEL_RED_COIN, MODEL_RED_COIN_NO_SHADOW,
+        MODEL_BLUE_COIN, MODEL_BLUE_COIN_NO_SHADOW,
+    }},
+    { "Trees", {
+        MODEL_CASTLE_GROUNDS_BUBBLY_TREE, MODEL_BOB_BUBBLY_TREE, MODEL_THI_BUBBLY_TREE,
+        MODEL_WDW_BUBBLY_TREE, MODEL_WF_BUBBLY_TREE, MODEL_UNKNOWN_TREE_1A,
+        MODEL_CCM_SNOW_TREE, MODEL_SL_SNOW_TREE, MODEL_COURTYARD_SPIKY_TREE,
+        MODEL_SSL_PALM_TREE
+    }},
+};
 
 #include "saturn/saturn_timelines.h"
 
@@ -754,6 +782,19 @@ void saturn_imgui_handle_events(SDL_Event * event) {
     smachinima_imgui_controls(event);
 }
 
+extern s8 sObjectListUpdateOrder[];
+void for_each_obj(std::function<void(struct Object*)> func) {
+    for (int index, i = 0; (index = sObjectListUpdateOrder[i]) != -1; i++) {
+        struct ObjectNode* list = &gObjectLists[index];
+        struct ObjectNode* curr = list->next;
+        while (list != curr) {
+            struct Object* obj = (struct Object*)curr;
+            func(obj);
+            curr = curr->next;
+        }
+    }
+}
+
 void saturn_keyframe_sort(std::vector<Keyframe>* keyframes) {
     for (int i = 0; i < keyframes->size(); i++) {
         for (int j = i + 1; j < keyframes->size(); j++) {
@@ -941,8 +982,6 @@ void ImGui_ConditionalCheckbox(const char* label, bool* val, bool cond) {
 std::vector<std::string> embedded_models = {};
 std::vector<std::string> embedded_anims = {};
 std::vector<std::string> embedded_eyes = {};
-
-extern s8 sObjectListUpdateOrder[];
 
 int num_objects_as_actors = 0;
 
@@ -1454,38 +1493,52 @@ void saturn_imgui_update() {
             ImGui::Separator();
         }
         ImGui::BeginDisabled(world_simulation_data);
-        bool any_objects = false;
-        int iter = 0;
-        for (int index, i = 0; (index = sObjectListUpdateOrder[i]) != -1; i++) {
-            struct ObjectNode* list = &gObjectLists[index];
-            struct ObjectNode* curr = list->next;
-            while (list != curr) {
-                struct Object* obj = (struct Object*)curr;
-                if (!(obj->header.gfx.node.flags & GRAPH_RENDER_INVISIBLE)) for (int modelID : saturn_iterable_obj_list) {
-                    if (obj->header.gfx.sharedChild == gLoadedGraphNodes[modelID]) {
-                        if (ImGui::Selectable((saturn_object_names[modelID] + "###model_id_" + std::to_string(iter++)).c_str())) {
-                            enum ModelID prev_mario_model = current_mario_model;
-                            current_mario_model = (enum ModelID)modelID;
-                            MarioActor* actor = saturn_spawn_actor(obj->oPosX, obj->oPosY, obj->oPosZ);
-                            current_mario_model = prev_mario_model;
-                            actor->angle = obj->oFaceAngleYaw;
-                            actor->obj_model = (enum ModelID)modelID;
-                            std::string name = saturn_object_names[modelID] + " Object " + std::to_string(++num_objects_as_actors);
-                            memcpy(actor->name, name.c_str(), name.length() + 1);
-                            struct Object* currobj = gCurrentObject;
-                            gCurrentObject = obj;
-                            cur_obj_hide();
-                            gCurrentObject = currobj;
-                        }
-                        if (ImGui::IsItemHovered()) obj->oFlags |= OBJ_FLAG_IS_SELECTED;
-                        else obj->oFlags &= ~OBJ_FLAG_IS_SELECTED;
-                        any_objects = true;
-                        break;
-                    }
+        if (ImGui::BeginCombo("###despawn_category_chooser", obj_categories[sel_category].first)) {
+            for (int i = 0; i < obj_categories.size(); i++) {
+                bool selected = sel_category == i;
+                if (ImGui::Selectable(obj_categories[i].first, selected)) {
+                    sel_category = i;
                 }
-                curr = curr->next;
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Despawn")) {
+            for (int model : obj_categories[sel_category].second) {
+                for_each_obj([&](struct Object* obj) {
+                    if (obj->header.gfx.sharedChild != gLoadedGraphNodes[model]) return;
+                    obj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
+                    obj_mark_for_deletion(obj);
+                });
             }
         }
+        ImGui::Separator();
+        bool any_objects = false;
+        int iter = 0;
+        for_each_obj([&](struct Object* obj) {
+            if (obj->header.gfx.node.flags & GRAPH_RENDER_INVISIBLE) return;
+            for (int modelID : saturn_iterable_obj_list) {
+                if (obj->header.gfx.sharedChild != gLoadedGraphNodes[modelID]) continue;
+                if (ImGui::Selectable((saturn_object_names[modelID] + "###model_id_" + std::to_string(iter++)).c_str())) {
+                    enum ModelID prev_mario_model = current_mario_model;
+                    current_mario_model = (enum ModelID)modelID;
+                    MarioActor* actor = saturn_spawn_actor(obj->oPosX, obj->oPosY, obj->oPosZ);
+                    current_mario_model = prev_mario_model;
+                    actor->angle = obj->oFaceAngleYaw;
+                    actor->obj_model = (enum ModelID)modelID;
+                    std::string name = saturn_object_names[modelID] + " Object " + std::to_string(++num_objects_as_actors);
+                    memcpy(actor->name, name.c_str(), name.length() + 1);
+                    struct Object* currobj = gCurrentObject;
+                    gCurrentObject = obj;
+                    cur_obj_hide();
+                    gCurrentObject = currobj;
+                }
+                if (ImGui::IsItemHovered()) obj->oFlags |= OBJ_FLAG_IS_SELECTED;
+                else obj->oFlags &= ~OBJ_FLAG_IS_SELECTED;
+                any_objects = true;
+                break;
+            }
+        });
         if (!any_objects) ImGui::Text("There aren't any objects\nyou can create actors from\nin this level.");
         ImGui::EndDisabled();
         ImGui::End();
