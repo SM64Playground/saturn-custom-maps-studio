@@ -109,7 +109,6 @@ bool         configEnableCli = false;
 bool         configUnstableFeatures = false;
 unsigned int configEditorThemeJson = 0x00384A4E; // hash of the "moon" string
 unsigned int configEditorTextures = 0;
-unsigned int configWorldSimSamplePeriod = 10;
 float        camera_fov = 50.0f;
 #ifdef BETTERCAMERA
 // BetterCamera settings
@@ -218,7 +217,6 @@ static const struct ConfigOption options[] = {
     {.name = "editor_theme_json", .type = CONFIG_TYPE_UINT, .uintValue = &configEditorThemeJson},
     {.name = "editor_textures", .type = CONFIG_TYPE_UINT, .uintValue = &configEditorTextures},
     {.name = "unstable_features", .type = CONFIG_TYPE_UINT, .boolValue = &configUnstableFeatures},
-    {.name = "worldsim_sample_period", .type = CONFIG_TYPE_UINT, .uintValue = &configWorldSimSamplePeriod},
     {.name = "default_fov", .type = CONFIG_TYPE_FLOAT, .floatValue = &camera_fov},
     #ifdef BETTERCAMERA
     {.name = "bettercam_enable",     .type = CONFIG_TYPE_BOOL, .boolValue = &configEnableCamera},
