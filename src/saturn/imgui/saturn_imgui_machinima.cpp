@@ -668,8 +668,8 @@ std::string create_anim_json(int frames, u16* indices, u16* values, int num_indi
 }
 
 std::string create_anim_c(int frames, u16* indices, u16* values, int num_indices, int num_values) {
-    std::string c = "static const struct Animation anim[] = {\n";
-    c += format_string("    1,\n");
+    std::string c = format_string("static const struct Animation %s[] = {\n", animname);
+    c += format_string("    %d,\n", animlooping ? 0 : 1);
     c += format_string("    0,\n");
     c += format_string("    0,\n");
     c += format_string("    0,\n");
@@ -678,12 +678,12 @@ std::string create_anim_c(int frames, u16* indices, u16* values, int num_indices
     c += format_string("    anim_values,\n");
     c += format_string("    anim_indices,\n");
     c += format_string("    0,\n");
-    c += format_string("};\n\nstatic const u16 anim_indices[] = {");
+    c += format_string("};\n\nstatic const u16 %s_indices[] = {", animname);
     for (int i = 0; i < num_indices; i++) {
         if (i % 6 == 0) c += "\n    ";
         c += format_string("0x%04X, ", indices[i]);
     }
-    c += format_string("\n};\n\nstatic const s16 anim_values[] = {");
+    c += format_string("\n};\n\nstatic const s16 %s_values[] = {", animname);
     for (int i = 0; i < num_values; i++) {
         if (i % 6 == 0) c += "\n    ";
         c += format_string("0x%04X, ", values[i]);
