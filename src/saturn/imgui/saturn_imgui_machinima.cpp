@@ -816,13 +816,16 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                 imgui_machinima_animation_player(actor, true);
                 ImGui::EndMenu();
             }
-            if (ImGui::MenuItem("Reset")) {
-                for (int i = 0; i < 20; i++) {
-                    actor->bones[i][0] = 0;
-                    actor->bones[i][1] = 0;
-                    actor->bones[i][2] = 0;
+            if (ImGui::Button("Randomize")) {
+                for (int i = 0; i < 60; i++) {
+                    actor->bones[i][0] = (rand() % 65536) / 65536.f * 360;
+                    actor->bones[i][1] = (rand() % 65536) / 65536.f * 360;
+                    actor->bones[i][2] = (rand() % 65536) / 65536.f * 360;
                 }
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Next Frame")) k_current_frame++;
+
 #define BONE_ENTRY(name) {                                      \
                 ImGui::TableSetColumnIndex(0);                   \
                 ImGui::PushItemWidth(200);                        \
