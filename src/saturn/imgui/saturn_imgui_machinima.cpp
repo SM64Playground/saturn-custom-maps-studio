@@ -1,6 +1,7 @@
 #include "saturn_imgui_machinima.h"
 
 #include <cstdarg>
+#include <functional>
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -309,6 +310,7 @@ extern u16 gRandomSeed16;
 char animname[256];
 char animauthor[256];
 bool animlooping = false;
+int animformat = 0;
 
 void imgui_machinima_quick_options() {
     if (ImGui::MenuItem(ICON_FK_CLOCK_O " Limit FPS",      "F4", limit_fps)) {
@@ -643,32 +645,65 @@ std::string format_string(const char* fmt, ...) {
     return dst;
 }
 
-void add_hex_u16(Json::Value* arr, u16 val) {
-    u8 hi = (val >> 8) & 0xFF;
-    u8 lo =  val       & 0xFF;
-    arr->put(*Json::Value(Json::JSONVALUE_STRING).assignString(format_string("0x%02X", hi)));
-    arr->put(*Json::Value(Json::JSONVALUE_STRING).assignString(format_string("0x%02X", lo)));
+std::string create_anim_json(int frames, u16* indices, u16* values, int num_indices, int num_values) {
+    std::string json = "{\n";
+    json += format_string("    \"name\": \"%s\",\n", Json::escaped_str(animname).c_str());
+    json += format_string("    \"author\": \"%s\",\n", Json::escaped_str(animauthor).c_str());
+    json += format_string("    \"looping\": \"%s\",\n", animlooping ? "true" : "false");
+    json += format_string("    \"length\": %d,\n", frames);
+    json += format_string("    \"nodes\": 0,\n");
+    json += format_string("    \"indices\": [");
+    for (int i = 0; i < num_indices; i++) {
+        if (i % 6 == 0) json += "\n        ";
+        json += format_string("\"0x%02X\",\"0x%02X\",", (indices[i] >> 8) & 0xFF, indices[i] & 0xFF);
+    }
+    json += "\n    ],\n";
+    json += "    \"values\": [";
+    for (int i = 0; i < num_values; i++) {
+        json += format_string("\"0x%02X\",\"0x%02X\",", (values[i] >> 8) & 0xFF, values[i] & 0xFF);
+        if (i % 6 == 0 && i + 1 != num_values) json += "\n        ";
+    }
+    json += "\n    ]\n}\n";
+    return json;
 }
 
-std::string create_anim_json(int frames, u16* indices, u16* values, int num_indices, int num_values) {
-    Json::Value json(Json::JSONVALUE_OBJECT);
-    json.put("name", *Json::Value(Json::JSONVALUE_STRING).assignString(animname));
-    json.put("author", *Json::Value(Json::JSONVALUE_STRING).assignString(animauthor));
-    json.put("looping", *Json::Value(Json::JSONVALUE_STRING).assignString(animlooping ? "true" : "false"));
-    json.put("length", *Json::Value(Json::JSONVALUE_NUMBER).assignNumber(frames));
-    json.put("nodes", *Json::Value(Json::JSONVALUE_NUMBER).assignNumber(0)); // unused
-    Json::Value ind(Json::JSONVALUE_ARRAY);
-    Json::Value val(Json::JSONVALUE_ARRAY);
+std::string create_anim_c(int frames, u16* indices, u16* values, int num_indices, int num_values) {
+    std::string c = "static const struct Animation anim[] = {\n";
+    c += format_string("    1,\n");
+    c += format_string("    0,\n");
+    c += format_string("    0,\n");
+    c += format_string("    0,\n");
+    c += format_string("    0x%02X,\n", frames);
+    c += format_string("    ANIMINDEX_NUMPARTS(anim_indices),\n");
+    c += format_string("    anim_values,\n");
+    c += format_string("    anim_indices,\n");
+    c += format_string("    0,\n");
+    c += format_string("};\n\nstatic const u16 anim_indices[] = {");
     for (int i = 0; i < num_indices; i++) {
-        add_hex_u16(&ind, indices[i]);
+        if (i % 6 == 0) c += "\n    ";
+        c += format_string("0x%04X, ", indices[i]);
     }
+    c += format_string("\n};\n\nstatic const s16 anim_values[] = {");
     for (int i = 0; i < num_values; i++) {
-        add_hex_u16(&val, values[i]);
+        if (i % 6 == 0) c += "\n    ";
+        c += format_string("0x%04X, ", values[i]);
     }
-    json.put("indices", ind);
-    json.put("values", val);
-    return json.stringify();
+    c += format_string("\n};\n");
+    return c;
 }
+
+#define ANIM_EXT(ext) { "." #ext, "*." #ext, #ext " files", create_anim_##ext }
+struct AnimationFormat {
+    const char* combo_item;
+    const char* filter;
+    const char* filter_name;
+    std::function<std::string(int, u16*, u16*, int, int)> encode;
+};
+
+std::vector<struct AnimationFormat> anim_formats = {
+    ANIM_EXT(json),
+    ANIM_EXT(c)
+};
 
 struct Animation sampling_animation;
 float sampling_frame = 0;
@@ -802,14 +837,26 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     for (auto timeline : k_frame_keys) {
                         saturn_keyframe_apply(timeline.first, k_current_frame);
                     }
-                    std::string json = create_anim_json(frames, indices, values, num_indices, num_values);
-                    std::string filepath = save_file_dialog("Save Animation", { "JSON file", "*.json", "All Files", "*" });
+                    std::string data = anim_formats[animformat].encode(frames, indices, values, num_indices, num_values);
+                    std::string filepath = save_file_dialog("Save Animation", { anim_formats[animformat].filter_name, anim_formats[animformat].filter, "All Files", "*" });
                     std::ofstream stream = std::ofstream(filepath, std::ios::binary);
-                    stream.write(json.c_str(), json.length());
+                    stream.write(data.c_str(), data.length());
                     stream.close();
                     free(indices);
                     free(values);
                 }
+                ImGui::SameLine();
+                ImGui::Text("as");
+                ImGui::SameLine();
+                ImGui::PushItemWidth(80);
+                if (ImGui::BeginCombo("###animformat", anim_formats[animformat].combo_item)) {
+                    for (int i = 0; i < anim_formats.size(); i++) {
+                        bool selected = i == animformat;
+                        if (ImGui::Selectable(anim_formats[i].combo_item, selected)) animformat = i;
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::PopItemWidth();
                 ImGui::TreePop();
             }
             ImGui::Separator();

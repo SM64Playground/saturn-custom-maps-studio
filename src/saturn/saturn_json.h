@@ -39,6 +39,7 @@ namespace Json {
     };
     class Value;
     class Increment;
+    static std::string escaped_str(std::string str);
 }
 
 struct Json::Token {
@@ -247,29 +248,6 @@ private:
         std::cout << "JSON parse error (at line " << std::to_string(line_num) << "): " << msg << std::endl;
         throw std::runtime_error(pfx "Failed to parse JSON");
     }
-    std::string escaped_str(std::string str) {
-        std::string escaped = "";
-        for (int i = 0; i < (int)str.length(); i++) {
-            switch (str[i]) {
-                case '\"': escaped += "\\\""; break;
-                case '\\': escaped += "\\\\"; break;
-                case '\b': escaped += "\\b"; break;
-                case '\f': escaped += "\\f"; break;
-                case '\n': escaped += "\\n"; break;
-                case '\r': escaped += "\\r"; break;
-                case '\t': escaped += "\\t"; break;
-                default:
-                    if (str[i] >= 32 && str[i] <= 126) escaped += str[i];
-                    else {
-                        std::stringstream stream;
-                        stream << std::hex << std::setw(4) << std::setfill('0') << (int)str[i];
-                        escaped += stream.str();
-                    }
-                    break;
-            }
-        }
-        return escaped;
-    }
     std::string strnum(double x) {
         int integer = (int)x;
         if (x == integer) return std::to_string(integer);
@@ -414,6 +392,30 @@ public:
         return type;
     }
 };
+
+static std::string Json::escaped_str(std::string str) {
+    std::string escaped = "";
+    for (int i = 0; i < (int)str.length(); i++) {
+        switch (str[i]) {
+            case '\"': escaped += "\\\""; break;
+            case '\\': escaped += "\\\\"; break;
+            case '\b': escaped += "\\b"; break;
+            case '\f': escaped += "\\f"; break;
+            case '\n': escaped += "\\n"; break;
+            case '\r': escaped += "\\r"; break;
+            case '\t': escaped += "\\t"; break;
+            default:
+                if (str[i] >= 32 && str[i] <= 126) escaped += str[i];
+                else {
+                    std::stringstream stream;
+                    stream << std::hex << std::setw(4) << std::setfill('0') << (int)str[i];
+                    escaped += stream.str();
+                }
+                break;
+        }
+    }
+    return escaped;
+}
 
 #undef is_alphanumeric
 #undef is_letter
