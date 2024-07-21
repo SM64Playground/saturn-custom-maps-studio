@@ -1,5 +1,6 @@
 #include "saturn_imgui_machinima.h"
 
+#include <cstdarg>
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -304,6 +305,10 @@ int frames_to_simulate = 300;
 
 extern struct Object gObjectPool[960];
 extern u16 gRandomSeed16;
+
+char animname[256];
+char animauthor[256];
+bool animlooping = false;
 
 void imgui_machinima_quick_options() {
     if (ImGui::MenuItem(ICON_FK_CLOCK_O " Limit FPS",      "F4", limit_fps)) {
@@ -617,6 +622,53 @@ std::vector<int> get_sorted_anim_list(MarioActor* actor) {
     return anim_list;
 }
 
+void get_animation_rotations(MarioActor* actor, float* dst, int frame) {
+    for (auto timeline : k_frame_keys) {
+        saturn_keyframe_apply(timeline.first, frame);
+    }
+    for (int i = 0; i < 60; i++) {
+        dst[i * 3 + 0] = actor->bones[i][0];
+        dst[i * 3 + 1] = actor->bones[i][1];
+        dst[i * 3 + 2] = actor->bones[i][2];
+    }
+}
+
+std::string format_string(const char* fmt, ...) {
+    char dst[1024];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(dst, 1024, fmt, args);
+    va_end(args);
+    return dst;
+}
+
+void add_hex_u16(Json::Value* arr, u16 val) {
+    u8 hi = (val >> 8) & 0xFF;
+    u8 lo =  val       & 0xFF;
+    arr->put(*Json::Value(Json::JSONVALUE_STRING).assignString(format_string("0x%02X", hi)));
+    arr->put(*Json::Value(Json::JSONVALUE_STRING).assignString(format_string("0x%02X", lo)));
+}
+
+std::string create_anim_json(int frames, u16* indices, u16* values, int num_indices, int num_values) {
+    Json::Value json(Json::JSONVALUE_OBJECT);
+    json.put("name", *Json::Value(Json::JSONVALUE_STRING).assignString(animname));
+    json.put("author", *Json::Value(Json::JSONVALUE_STRING).assignString(animauthor));
+    json.put("looping", *Json::Value(Json::JSONVALUE_STRING).assignString(animlooping ? "true" : "false"));
+    json.put("length", *Json::Value(Json::JSONVALUE_NUMBER).assignNumber(frames));
+    json.put("nodes", *Json::Value(Json::JSONVALUE_NUMBER).assignNumber(0)); // unused
+    Json::Value ind(Json::JSONVALUE_ARRAY);
+    Json::Value val(Json::JSONVALUE_ARRAY);
+    for (int i = 0; i < num_indices; i++) {
+        add_hex_u16(&ind, indices[i]);
+    }
+    for (int i = 0; i < num_values; i++) {
+        add_hex_u16(&val, values[i]);
+    }
+    json.put("indices", ind);
+    json.put("values", val);
+    return json.stringify();
+}
+
 struct Animation sampling_animation;
 float sampling_frame = 0;
 bool sampling_anim_loaded = false;
@@ -702,6 +754,64 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
         if (!sampling) if (ImGui::BeginTabItem("Custom")) {
             actor->custom_bone = true;
             int currbone = 0;
+            if (ImGui::TreeNode("Export")) {
+                ImGui::InputText("Name", animname, 256);
+                ImGui::InputText("Author", animauthor, 256);
+                ImGui::Checkbox("Looping", &animlooping);
+                if (ImGui::Button("Export")) {
+                    int frames = 1;
+                    for (int i = 1; i <= 20; i++) {
+                        std::string timelineID = saturn_keyframe_get_mario_timeline_id("k_mariobone_" + std::to_string(i), saturn_actor_indexof(actor));
+                        if (saturn_timeline_exists(timelineID.c_str())) {
+                            for (auto kf : k_frame_keys[timelineID].second) {
+                                if (frames < kf.position) frames = kf.position + 1;
+                            }
+                        }
+                    }
+                    for (int i = 0; i < 60; i++) {
+                        std::string timelineID = saturn_keyframe_get_mario_timeline_id("k_objbone_" + std::to_string(i), saturn_actor_indexof(actor));
+                        if (saturn_timeline_exists(timelineID.c_str())) {
+                            for (auto kf : k_frame_keys[timelineID].second) {
+                                if (frames < kf.position) frames = kf.position + 1;
+                            }
+                        }
+                    }
+                    int num_indices = 6 * (actor->num_bones + 1);
+                    int num_values = 3 * actor->num_bones * frames + 1;
+                    u16* indices = (u16*)malloc(sizeof(u16) * num_indices);
+                    u16* values = (u16*)malloc(sizeof(u16) * num_values);
+                    indices[0] = indices[2] = indices[4] = 1;
+                    indices[1] = indices[3] = indices[5] = 0;
+                    values[0] = 0;
+                    float rotations[3 * 60];
+                    for (int i = 0; i < actor->num_bones; i++) {
+                        indices[(i + 1) * 6 + 0] = indices[(i + 1) * 6 + 2] = indices[(i + 1) * 6 + 4] = frames;
+                        indices[(i + 1) * 6 + 1] = (i * 3 + 0) * frames + 1;
+                        indices[(i + 1) * 6 + 3] = (i * 3 + 1) * frames + 1;
+                        indices[(i + 1) * 6 + 5] = (i * 3 + 2) * frames + 1;
+                    }
+                    for (int i = 0; i < frames; i++) {
+                        get_animation_rotations(actor, rotations, i);
+                        for (int j = 0; j < actor->num_bones; j++) {
+                            values[(j * 3 + 0) * frames + i + 1] = rotations[j * 3 + 0] / 360.f * 65536;
+                            values[(j * 3 + 1) * frames + i + 1] = rotations[j * 3 + 1] / 360.f * 65536;
+                            values[(j * 3 + 2) * frames + i + 1] = rotations[j * 3 + 2] / 360.f * 65536;
+                        }
+                    }
+                    for (auto timeline : k_frame_keys) {
+                        saturn_keyframe_apply(timeline.first, k_current_frame);
+                    }
+                    std::string json = create_anim_json(frames, indices, values, num_indices, num_values);
+                    std::string filepath = save_file_dialog("Save Animation", { "JSON file", "*.json", "All Files", "*" });
+                    std::ofstream stream = std::ofstream(filepath, std::ios::binary);
+                    stream.write(json.c_str(), json.length());
+                    stream.close();
+                    free(indices);
+                    free(values);
+                }
+                ImGui::TreePop();
+            }
+            ImGui::Separator();
             if (ImGui::BeginMenu("Sample")) {
                 imgui_machinima_animation_player(actor, true);
                 ImGui::EndMenu();

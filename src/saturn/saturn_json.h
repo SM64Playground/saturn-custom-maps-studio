@@ -276,6 +276,9 @@ private:
         return std::to_string(x);
     }
 public:
+    Value(ValueType type = JSONVALUE_NULL) {
+        this->type = type;
+    }
     Value operator [](std::string key) {
         if (type != JSONVALUE_OBJECT) throw std::runtime_error(pfx "not an object");
         if (!isMember(key)) throw std::runtime_error(pfx "key doesn't exist");
@@ -325,13 +328,30 @@ public:
         if (type == JSONVALUE_ARRAY) return arr.size();
         throw std::runtime_error(pfx "not a sizeable type");
     }
-    void put(std::string name, Json::Value value) {
+    Value* put(std::string name, Json::Value value) {
         if (type != JSONVALUE_OBJECT) throw std::runtime_error(pfx "not an object");
         obj.insert({ name, value });
+        return this;
     }
-    void put(Json::Value value) {
+    Value* put(Json::Value value) {
         if (type != JSONVALUE_ARRAY) throw std::runtime_error(pfx "not an array");
         arr.push_back(value);
+        return this;
+    }
+    Value* assignString(std::string str) {
+        if (type != JSONVALUE_STRING) throw std::runtime_error(pfx "not a string");
+        this->str = str;
+        return this;
+    }
+    Value* assignNumber(double num) {
+        if (type != JSONVALUE_NUMBER) throw std::runtime_error(pfx "not a number");
+        this->num = num;
+        return this;
+    }
+    Value* assignBool(bool val) {
+        if (type != JSONVALUE_BOOL) throw std::runtime_error(pfx "not a bool");
+        this->num = val;
+        return this;
     }
     auto array() {
         if (type != JSONVALUE_ARRAY) throw std::runtime_error(pfx "not an array");

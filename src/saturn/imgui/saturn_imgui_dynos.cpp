@@ -76,6 +76,10 @@ std::vector<std::string> choose_file_dialog(std::string windowTitle, std::vector
     return pfd::open_file(windowTitle, ".", filetypes, multiselect ? pfd::opt::multiselect : pfd::opt::none).result();
 }
 
+std::string save_file_dialog(std::string windowTitle, std::vector<std::string> filetypes) {
+    return pfd::save_file(windowTitle, ".", filetypes, pfd::opt::none).result();
+}
+
 void open_directory(std::string path) {
 #if defined(_WIN32) // Windows
     ShellExecuteA(NULL, "open", ("\"" + path + "\"").c_str(), NULL, NULL, SW_SHOWNORMAL);
