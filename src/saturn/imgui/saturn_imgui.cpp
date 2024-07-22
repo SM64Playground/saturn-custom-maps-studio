@@ -8,6 +8,7 @@
 #include <map>
 #include <fstream>
 
+#include "behavior_data.h"
 #include "game/area.h"
 #include "model_ids.h"
 #include "object_constants.h"
@@ -131,29 +132,24 @@ float game_viewport[4] = { 0, 0, -1, -1 };
 bool request_mario_tab = false;
 
 int sel_category = 0;
-std::vector<std::pair<const char*, std::vector<int>>> obj_categories = {
+std::vector<std::pair<const char*, std::vector<const BehaviorScript*>>> obj_categories = {
     { "Enemies", {
-        MODEL_GOOMBA, MODEL_KOOPA_WITH_SHELL, MODEL_KOOPA_WITHOUT_SHELL,
-        MODEL_BLACK_BOBOMB, MODEL_KING_BOBOMB, MODEL_WHOMP, MODEL_ENEMY_LAKITU,
-        MODEL_UNAGI, MODEL_SNUFIT, MODEL_BUBBA, MODEL_FLYGUY, MODEL_FWOOSH,
-        MODEL_BOO, MODEL_BOO_CASTLE, MODEL_MONTY_MOLE, MODEL_MONEYBAG,
-        MODEL_MR_BLIZZARD, MODEL_MR_BLIZZARD_HIDDEN, MODEL_POKEY_BODY_PART,
-        MODEL_POKEY_HEAD, MODEL_SCUTTLEBUG, MODEL_BULLY, MODEL_BULLY_BOSS,
-        MODEL_CHILL_BULLY, MODEL_BIG_CHILL_BULLY, MODEL_CHUCKYA,
-        MODEL_BOWSER, MODEL_BOWSER2, MODEL_PIRANHA_PLANT, MODEL_SPINY,
-        MODEL_SPINDRIFT, MODEL_BUB, MODEL_SUSHI, MODEL_SKEETER,
-        MODEL_HEAVE_HO, MODEL_AMP, MODEL_MR_I, MODEL_MR_I_IRIS,
+        bhvGoomba, bhvKoopa, bhvBobomb, bhvKingBobomb, bhvWhompKingBoss, bhvThwomp,
+        bhvThwomp2, bhvEnemyLakitu, bhvUnagi, bhvSnufit, bhvBubba, bhvFlyGuy,
+        bhvFlamethrower, bhvBoo, bhvMontyMole, bhvMoneybag, bhvMoneybagHidden,
+        bhvPokey, bhvPokeyBodyPart, bhvMrIBody, bhvMrI, bhvMrBlizzard,
+        bhvScuttlebug, bhvScuttlebugSpawn, bhvChuckya, bhvSmallBully, bhvSmallChillBully,
+        bhvBigBully, bhvBigBullyWithMinions, bhvBigChillBully, bhvBowser,
+        bhvPiranhaPlant, bhvSpiny, bhvSpindrift, bhvBub, bhvSushiShark, bhvSkeeter,
+        bhvHeaveHo, bhvHeaveHoThrowMario, bhvHomingAmp, bhvCirclingAmp
     }},
     { "Coins", {
-        MODEL_YELLOW_COIN, MODEL_YELLOW_COIN_NO_SHADOW,
-        MODEL_RED_COIN, MODEL_RED_COIN_NO_SHADOW,
-        MODEL_BLUE_COIN, MODEL_BLUE_COIN_NO_SHADOW,
+        bhvYellowCoin, bhvBlueCoinSliding, bhvBlueCoinJumping,
+        bhvOneCoin, bhvRedCoin, bhvMovingYellowCoin, bhvMovingBlueCoin,
+        bhvSingleCoinGetsSpawned
     }},
     { "Trees", {
-        MODEL_CASTLE_GROUNDS_BUBBLY_TREE, MODEL_BOB_BUBBLY_TREE, MODEL_THI_BUBBLY_TREE,
-        MODEL_WDW_BUBBLY_TREE, MODEL_WF_BUBBLY_TREE, MODEL_UNKNOWN_TREE_1A,
-        MODEL_CCM_SNOW_TREE, MODEL_SL_SNOW_TREE, MODEL_COURTYARD_SPIKY_TREE,
-        MODEL_SSL_PALM_TREE
+        bhvTree
     }},
 };
 
@@ -1504,9 +1500,9 @@ void saturn_imgui_update() {
         }
         ImGui::SameLine();
         if (ImGui::Button("Despawn")) {
-            for (int model : obj_categories[sel_category].second) {
+            for (const BehaviorScript* bhv : obj_categories[sel_category].second) {
                 for_each_obj([&](struct Object* obj) {
-                    if (obj->header.gfx.sharedChild != gLoadedGraphNodes[model]) return;
+                    if (obj->behavior != bhv) return;
                     obj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
                     obj_mark_for_deletion(obj);
                 });
