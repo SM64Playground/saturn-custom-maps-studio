@@ -358,6 +358,8 @@ Gfx* create_imageref() {
     make_vertex(vtx, 2, x + w / 2, y - h / 2, -1, 32 << 5, 32 << 5, 255, 255, 255, 255);
     make_vertex(vtx, 3, x + w / 2, y + h / 2, -1, 32 << 5, 0, 255, 255, 255, 255);
     gSPDisplayList(head++, dl_skybox_begin);
+	gDPSetCombineLERP(head++, 0, 0, 0, TEXEL0, 0, 0, 0, ENVIRONMENT, 0, 0, 0, TEXEL0, 0, 0, 0, ENVIRONMENT);
+    gDPSetEnvColor(head++, 255, 255, 255, 255);
     gSPMatrix(head++, mtx, G_MTX_PROJECTION | G_MTX_MUL);
     gSPDisplayList(head++, dl_skybox_tile_tex_settings);
     gLoadBlockTexture(head++, 32, 32, G_IM_FMT_RGBA, "_IMAGEREF.rgba32.png");
