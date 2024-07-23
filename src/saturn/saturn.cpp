@@ -738,7 +738,10 @@ void saturn_update() {
     if (current_project != "") saturn_load_project((char*)current_project.c_str());
 
     if (world_simulation_data) {
+        struct GraphNodeObject_sub animdata;
+        memcpy(&animdata, &gMarioObject->header.gfx.unk38, sizeof(animdata));
         memcpy(gObjectPool, world_simulation_data[(int)world_simulation_curr_frame], sizeof(*world_simulation_data));
+        memcpy(&gMarioObject->header.gfx.unk38, &animdata, sizeof(animdata));
         gAreaUpdateCounter = world_simulation_curr_frame;
     }
 
