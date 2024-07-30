@@ -41,7 +41,7 @@ FileBrowserEntry root = FileBrowserEntry("root", true, nullptr);
 FileBrowserEntry* curr = &root;
 int browser_height = 150;
 std::filesystem::path selected_path;
-std::string extension_filter = "";
+std::vector<std::string> extension_filters = {};
 std::map<std::string, char*> search_terms = {};
 std::map<std::string, std::string> selected_paths = {};
 std::map<std::filesystem::path, FileBrowserEntry*> scanned_paths = {};
@@ -71,7 +71,15 @@ void saturn_file_browser_scan_directory_internal(std::filesystem::path dir, bool
         }
         std::string ext = path.extension().string();
         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-        if (extension_filter != "" && ext != ("." + extension_filter)) continue;
+        bool allowed = false;
+        if (extension_filters.empty()) allowed = true;
+        else for (std::string extension : extension_filters) {
+            if (ext == "." + extension) {
+                allowed = true;
+                break;
+            }
+        }
+        if (!allowed) continue;
         files.push_back(path.filename().string());
     }
     auto stringcomp = [](std::string a, std::string b) {
@@ -108,9 +116,17 @@ void saturn_file_browser_rescan_directory(std::filesystem::path dir, bool recurs
     saturn_file_browser_scan_directory(dir, recursive);
 }
 
+void saturn_file_browser_filter_extensions(std::vector<std::string> extensions) {
+    extension_filters = {};
+    for (int i = 0; i < extensions.size(); i++) {
+        std::string ext = std::string(extensions[i]);
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        extension_filters.push_back(ext);
+    }
+}
+
 void saturn_file_browser_filter_extension(std::string extension) {
-    extension_filter = std::string(extension);
-    std::transform(extension_filter.begin(), extension_filter.end(), extension_filter.begin(), ::tolower);
+    saturn_file_browser_filter_extensions({ extension });
 }
 
 void saturn_file_browser_height(int height) {
@@ -120,7 +136,7 @@ void saturn_file_browser_height(int height) {
 void saturn_file_browser_clear() {
     root.clear();
     browser_height = 150;
-    extension_filter = "";
+    extension_filters = {};
 }
 
 bool saturn_file_browser_create_imgui(FileBrowserEntry dir, std::string path, std::string browser_id, bool do_search) {

@@ -636,6 +636,19 @@ void get_animation_rotations(MarioActor* actor, float* dst, int frame) {
     }
 }
 
+struct BinaryStream {
+    int length;
+    unsigned char* data;
+};
+
+struct BinaryStream* make_stream_from_string(std::string str) {
+    struct BinaryStream* stream = (struct BinaryStream*)malloc(sizeof(struct BinaryStream));
+    stream->length = str.length();
+    stream->data = (unsigned char*)malloc(stream->length);
+    memcpy(stream->data, str.data(), str.length());
+    return stream;
+}
+
 std::string format_string(const char* fmt, ...) {
     char dst[1024];
     va_list args;
@@ -645,7 +658,7 @@ std::string format_string(const char* fmt, ...) {
     return dst;
 }
 
-std::string create_anim_json(int frames, u16* indices, u16* values, int num_indices, int num_values) {
+struct BinaryStream* create_anim_json(int frames, u16* indices, u16* values, int num_indices, int num_values) {
     std::string json = "{\n";
     json += format_string("    \"name\": \"%s\",\n", Json::escaped_str(animname).c_str());
     json += format_string("    \"author\": \"%s\",\n", Json::escaped_str(animauthor).c_str());
@@ -664,10 +677,10 @@ std::string create_anim_json(int frames, u16* indices, u16* values, int num_indi
         if (i % 6 == 0 && i + 1 != num_values) json += "\n        ";
     }
     json += "\n    ]\n}\n";
-    return json;
+    return make_stream_from_string(json);
 }
 
-std::string create_anim_c(int frames, u16* indices, u16* values, int num_indices, int num_values) {
+struct BinaryStream* create_anim_c(int frames, u16* indices, u16* values, int num_indices, int num_values) {
     std::string c = format_string("static const struct Animation %s[] = {\n", animname);
     c += format_string("    %d,\n", animlooping ? 0 : 1);
     c += format_string("    0,\n");
@@ -689,7 +702,33 @@ std::string create_anim_c(int frames, u16* indices, u16* values, int num_indices
         c += format_string("0x%04X, ", values[i]);
     }
     c += format_string("\n};\n");
-    return c;
+    return make_stream_from_string(c);
+}
+
+struct BinaryStream* create_anim_panim(int frames, u16* indices, u16* values, int num_indices, int num_values) {
+    struct BinaryStream* stream = (struct BinaryStream*)malloc(sizeof(struct BinaryStream*));
+    stream->length = 80 + (num_values + num_indices) * 2;
+    stream->data = (unsigned char*)malloc(stream->length);
+    memset(stream->data, 0, stream->length);
+    memcpy(stream->data + 0x00, animname, 32);
+    memcpy(stream->data + 0x20, animauthor, 32);
+    stream->data[0x40] = animlooping;
+    stream->data[0x41] =  frames       & 0xFF;
+    stream->data[0x42] = (frames >> 8) & 0xFF;
+    int ptr = 0x43;
+    memcpy(stream->data + ptr, "values", 6);
+    ptr += 6;
+    for (int i = 0; i < num_values; i++) {
+        stream->data[ptr++] = (values[i] >> 8) & 0xFF;
+        stream->data[ptr++] =  values[i]       & 0xFF;
+    }
+    memcpy(stream->data + ptr, "indices", 7);
+    ptr += 7;
+    for (int i = 0; i < num_indices; i++) {
+        stream->data[ptr++] = (indices[i] >> 8) & 0xFF;
+        stream->data[ptr++] =  indices[i]       & 0xFF;
+    }
+    return stream;
 }
 
 #define ANIM_EXT(ext) { "." #ext, "*." #ext, #ext " files", create_anim_##ext }
@@ -697,12 +736,13 @@ struct AnimationFormat {
     const char* combo_item;
     const char* filter;
     const char* filter_name;
-    std::function<std::string(int, u16*, u16*, int, int)> encode;
+    std::function<struct BinaryStream*(int, u16*, u16*, int, int)> encode;
 };
 
 std::vector<struct AnimationFormat> anim_formats = {
     ANIM_EXT(json),
-    ANIM_EXT(c)
+    ANIM_EXT(c),
+    ANIM_EXT(panim)
 };
 
 struct Animation sampling_animation;
@@ -752,7 +792,7 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
         }
         if (ImGui::BeginTabItem("MComp")) {
             ImGui::PushItemWidth(316);
-            saturn_file_browser_filter_extension("json");
+            saturn_file_browser_filter_extensions({ "json", "panim" });
             saturn_file_browser_scan_directory("dynos/anims");
             saturn_file_browser_height(120);
             if (saturn_file_browser_show("animations")) {
@@ -760,10 +800,42 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                 if (std::find(canim_array.begin(), canim_array.end(), path) == canim_array.end()) canim_array.push_back(path);
                 if (sampling) {
                     sampling_anim_loaded = true;
-                    std::ifstream stream = std::ifstream(current_anim_dir_path / std::filesystem::path(path));
-                    Json::Value value;
-                    value << stream;
-                    auto [ length, values, indices ] = read_bone_data(value);
+                    std::filesystem::path fpath = current_anim_dir_path / std::filesystem::path(path);
+                    std::ifstream stream = std::ifstream(fpath);
+                    int length;
+                    std::vector<s16> values, indices;
+                    if (fpath.extension() == ".panim") {
+                        int filelen = std::filesystem::file_size(fpath);
+                        unsigned char* data = (unsigned char*)malloc(filelen);
+                        stream.read((char*)data, filelen);
+                        length = (int)data[0x41] + (int)data[0x42] * 0x100;
+                        int ptr = 0x43;
+                        std::vector<s16>* curr_array;
+                        while (ptr < filelen) {
+                            if (strcmp((char*)data + ptr, "values")  == 0) {
+                                curr_array = &values;
+                                ptr += 6;
+                                continue;
+                            }
+                            if (strcmp((char*)data + ptr, "indices") == 0) {
+                                curr_array = &indices;
+                                ptr += 7;
+                                continue;
+                            }
+                            curr_array->push_back((int)data[ptr] * 256 + (int)data[ptr + 1]);
+                            ptr += 2;
+                        }
+                        free(data);
+                        stream.close();
+                    }
+                    else {
+                        Json::Value value;
+                        value << stream;
+                        auto [ _length, _values, _indices ] = read_bone_data(value);
+                        length = _length;
+                        values = _values;
+                        indices = _indices;
+                    }
                     sampling_values = values;
                     sampling_indices = indices;
                     sampling_animation.flags = 4;
@@ -837,13 +909,15 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     for (auto timeline : k_frame_keys) {
                         saturn_keyframe_apply(timeline.first, k_current_frame);
                     }
-                    std::string data = anim_formats[animformat].encode(frames, indices, values, num_indices, num_values);
+                    struct BinaryStream* data = anim_formats[animformat].encode(frames, indices, values, num_indices, num_values);
                     std::string filepath = save_file_dialog("Save Animation", { anim_formats[animformat].filter_name, anim_formats[animformat].filter, "All Files", "*" });
                     std::ofstream stream = std::ofstream(filepath, std::ios::binary);
-                    stream.write(data.c_str(), data.length());
+                    stream.write((char*)data->data, data->length);
                     stream.close();
                     free(indices);
                     free(values);
+                    free(data->data);
+                    free(data);
                 }
                 ImGui::SameLine();
                 ImGui::Text("as");
