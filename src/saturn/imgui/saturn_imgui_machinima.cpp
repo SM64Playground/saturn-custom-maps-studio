@@ -354,6 +354,7 @@ void imgui_machinima_quick_options() {
             // Erase existing timelines
             k_frame_keys.clear();
         }
+
         for (int i = 0; i < 6; i++) {
             ImGui::SameLine();
             if (ImGui::Button((std::string(enabled_acts[i] ? ICON_FK_STAR : ICON_FK_STAR_O) + "###act_select_" + std::to_string(i)).c_str())) {
@@ -361,6 +362,13 @@ void imgui_machinima_quick_options() {
             }
             imgui_bundled_tooltip((std::string(enabled_acts[i] ? "Disable" : "Enable") + " act " + std::to_string(i + 1) + " objects").c_str());
         }
+
+        extern bool rainbow;
+
+        ImGui::Separator();
+        ImGui::Checkbox("Rainbow DisplayLists", &rainbow);
+        imgui_bundled_tooltip("Sets the displaylists to be Rainbow.");
+        saturn_keyframe_popout("k_r_dls");
 
         /*auto locations = saturn_get_locations();
         bool do_save = false;
