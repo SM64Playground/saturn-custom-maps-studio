@@ -363,13 +363,6 @@ void imgui_machinima_quick_options() {
             imgui_bundled_tooltip((std::string(enabled_acts[i] ? "Disable" : "Enable") + " act " + std::to_string(i + 1) + " objects").c_str());
         }
 
-        extern bool rainbow;
-
-        ImGui::Separator();
-        ImGui::Checkbox("Rainbow DisplayLists", &rainbow);
-        imgui_bundled_tooltip("Sets the displaylists to be Rainbow.");
-        saturn_keyframe_popout("k_r_dls");
-
         /*auto locations = saturn_get_locations();
         bool do_save = false;
         std::vector<std::string> forRemoval = {};
@@ -405,6 +398,7 @@ void imgui_machinima_quick_options() {
         }
         if (do_save) saturn_save_locations();*/
     }
+    extern bool rainbow;
     ImGui::Separator();
     ImGui::Checkbox("HUD", &configHUD);
     imgui_bundled_tooltip("Controls the in-game HUD visibility.");
@@ -416,6 +410,9 @@ void imgui_machinima_quick_options() {
     imgui_bundled_tooltip("If enabled, Mario will be invulnerable to most enemies and hazards.");
     ImGui::Checkbox("Fog", &enable_fog);
     imgui_bundled_tooltip("Toggles the fog, useful for near-clipping shots");
+    ImGui::Checkbox("Rainbow DisplayLists", &rainbow);
+    imgui_bundled_tooltip("Sets the displaylists to be Rainbow.");
+    saturn_keyframe_popout("k_r_dls");
     int previous_time_freeze_state = time_freeze_state;
     ImGui::PushItemWidth(150);
     ImGui::Combo("Time Freeze", &time_freeze_state, "Unfrozen\0Mario-exclusive\0Everything\0");
