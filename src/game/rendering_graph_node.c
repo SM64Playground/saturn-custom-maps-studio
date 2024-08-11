@@ -181,6 +181,8 @@ void mtx_patch_interpolated(void) {
     sViewportPos = NULL;
 }
 
+bool rainbow = false;
+
 /**
  * Process a master list node.
  */
@@ -223,6 +225,10 @@ static void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
     if (enableZBuffer != 0) {
         gDPPipeSync(gDisplayListHead++);
         gSPClearGeometryMode(gDisplayListHead++, G_ZBUFFER);
+    }
+
+    if (rainbow) {
+        gSPClearGeometryMode(gDisplayListHead++, G_LIGHTING);
     }
 }
 
