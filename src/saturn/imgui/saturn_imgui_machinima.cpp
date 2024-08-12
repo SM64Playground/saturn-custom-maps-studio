@@ -409,8 +409,8 @@ void imgui_machinima_quick_options() {
     imgui_bundled_tooltip("If enabled, Mario will be invulnerable to most enemies and hazards.");
     ImGui::Checkbox("Fog", &enable_fog);
     imgui_bundled_tooltip("Toggles the fog, useful for near-clipping shots");
-    ImGui::Checkbox("Rainbow DisplayLists", &rainbow);
-    imgui_bundled_tooltip("Makes the displaylists Rainbow.");
+    ImGui::Checkbox("Rainbow Level", &rainbow);
+    imgui_bundled_tooltip("Makes the level rainbow.");
     saturn_keyframe_popout("k_r_dls");
     int previous_time_freeze_state = time_freeze_state;
     ImGui::PushItemWidth(150);
