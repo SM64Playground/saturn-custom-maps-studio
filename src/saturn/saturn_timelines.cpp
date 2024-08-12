@@ -31,7 +31,6 @@ std::map<std::string, std::vector<std::string>> kf_switch_names = {
 
 // { id, { variable_ptr, type, behavior, name, precision, num_values, is_mario } }
 void saturn_fill_data_table() {
-    extern bool rainbow;
     SATURN_KFENTRY_BOOL("k_skybox_mode", &use_color_background, "Skybox Mode", false);
     SATURN_KFENTRY_BOOL("k_shadows", &enable_shadows, "Shadows", false);
     SATURN_KFENTRY_FLOAT("k_shade_x", &world_light_dir1, 1, "Shade X", false);

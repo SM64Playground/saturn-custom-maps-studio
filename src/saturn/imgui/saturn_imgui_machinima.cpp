@@ -398,7 +398,6 @@ void imgui_machinima_quick_options() {
         }
         if (do_save) saturn_save_locations();*/
     }
-    extern bool rainbow;
     ImGui::Separator();
     ImGui::Checkbox("HUD", &configHUD);
     imgui_bundled_tooltip("Controls the in-game HUD visibility.");
@@ -411,7 +410,7 @@ void imgui_machinima_quick_options() {
     ImGui::Checkbox("Fog", &enable_fog);
     imgui_bundled_tooltip("Toggles the fog, useful for near-clipping shots");
     ImGui::Checkbox("Rainbow DisplayLists", &rainbow);
-    imgui_bundled_tooltip("Sets the displaylists to be Rainbow.");
+    imgui_bundled_tooltip("Makes the displaylists Rainbow.");
     saturn_keyframe_popout("k_r_dls");
     int previous_time_freeze_state = time_freeze_state;
     ImGui::PushItemWidth(150);

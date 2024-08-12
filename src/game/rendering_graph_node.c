@@ -181,8 +181,6 @@ void mtx_patch_interpolated(void) {
     sViewportPos = NULL;
 }
 
-bool rainbow = false;
-
 /**
  * Process a master list node.
  */
