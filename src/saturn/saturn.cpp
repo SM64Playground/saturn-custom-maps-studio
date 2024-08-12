@@ -60,6 +60,7 @@ struct MouseState prev_mouse_state;
 
 bool enable_head_rotations = false;
 bool enable_shadows = false;
+bool rainbow = false;
 bool enable_dust_particles = false;
 bool enable_torso_rotation = true;
 bool enable_fog = true;
