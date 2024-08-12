@@ -260,7 +260,7 @@ void spawn_particle(u32 activeParticleFlag, s16 model, const BehaviorScript *beh
     }
 }
 
-bool mstruct_hidden = false;
+bool mstruct_hidden = true;
 
 /**
  * Mario's primary behavior update function.
