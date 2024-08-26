@@ -677,8 +677,8 @@ struct BinaryStream* create_anim_json(int frames, u16* indices, u16* values, int
     json += "\n    ],\n";
     json += "    \"values\": [";
     for (int i = 0; i < num_values; i++) {
+        if (i % 6 == 0) json += "\n        ";
         json += format_string("\"0x%02X\",\"0x%02X\",", (values[i] >> 8) & 0xFF, values[i] & 0xFF);
-        if (i % 6 == 0 && i + 1 != num_values) json += "\n        ";
     }
     json += "\n    ]\n}\n";
     return make_stream_from_string(json);
@@ -714,12 +714,12 @@ struct BinaryStream* create_anim_panim(int frames, u16* indices, u16* values, in
     stream->length = 80 + (num_values + num_indices) * 2;
     stream->data = (unsigned char*)malloc(stream->length);
     memset(stream->data, 0, stream->length);
-    memcpy(stream->data + 0x00, animname, 32);
-    memcpy(stream->data + 0x20, animauthor, 32);
-    stream->data[0x40] = animlooping;
-    stream->data[0x41] =  frames       & 0xFF;
-    stream->data[0x42] = (frames >> 8) & 0xFF;
-    int ptr = 0x43;
+    memcpy(stream->data + 0x00, animname, 48);
+    memcpy(stream->data + 0x30, animauthor, 48);
+    stream->data[0x60] = animlooping;
+    stream->data[0x61] =  frames       & 0xFF;
+    stream->data[0x62] = (frames >> 8) & 0xFF;
+    int ptr = 0x63;
     memcpy(stream->data + ptr, "values", 6);
     ptr += 6;
     for (int i = 0; i < num_values; i++) {
@@ -872,8 +872,8 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                 ImGui::Checkbox("Looping", &animlooping);
                 if (ImGui::Button("Export")) {
                     int frames = 1;
-                    for (int i = 1; i <= 20; i++) {
-                        std::string timelineID = saturn_keyframe_get_mario_timeline_id("k_mariobone_" + std::to_string(i), saturn_actor_indexof(actor));
+                    for (int i = 0; i <= 20; i++) {
+                        std::string timelineID = saturn_keyframe_get_mario_timeline_id("k_mariobone_" + (i == 0 ? "t" : std::to_string(i)), saturn_actor_indexof(actor));
                         if (saturn_timeline_exists(timelineID.c_str())) {
                             for (auto kf : k_frame_keys[timelineID].second) {
                                 if (frames < kf.position) frames = kf.position + 1;
@@ -881,7 +881,7 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                         }
                     }
                     for (int i = 0; i < 60; i++) {
-                        std::string timelineID = saturn_keyframe_get_mario_timeline_id("k_objbone_" + std::to_string(i), saturn_actor_indexof(actor));
+                        std::string timelineID = saturn_keyframe_get_mario_timeline_id("k_objbone_" + (i == 0 ? "t" : std::to_string(i - 1)), saturn_actor_indexof(actor));
                         if (saturn_timeline_exists(timelineID.c_str())) {
                             for (auto kf : k_frame_keys[timelineID].second) {
                                 if (frames < kf.position) frames = kf.position + 1;
@@ -892,9 +892,6 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     int num_values = 3 * actor->num_bones * frames;
                     u16* indices = (u16*)malloc(sizeof(u16) * num_indices);
                     u16* values = (u16*)malloc(sizeof(u16) * num_values);
-                    indices[0] = indices[2] = indices[4] = 1;
-                    indices[1] = indices[3] = indices[5] = 0;
-                    values[0] = 0;
                     float rotations[3 * 60];
                     for (int i = 0; i < actor->num_bones; i++) {
                         indices[i * 6 + 0] = indices[i * 6 + 2] = indices[i * 6 + 4] = frames;
@@ -905,9 +902,10 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     for (int i = 0; i < frames; i++) {
                         get_animation_rotations(actor, rotations, i);
                         for (int j = 0; j < actor->num_bones; j++) {
-                            values[(j * 3 + 0) * frames + i + 1] = rotations[j * 3 + 0] / 360.f * 65536;
-                            values[(j * 3 + 1) * frames + i + 1] = rotations[j * 3 + 1] / 360.f * 65536;
-                            values[(j * 3 + 2) * frames + i + 1] = rotations[j * 3 + 2] / 360.f * 65536;
+                            float multiplier = j == 0 ? 1 : (65536 / 360.f);
+                            values[(j * 3 + 0) * frames + i] = rotations[j * 3 + 0] * multiplier;
+                            values[(j * 3 + 1) * frames + i] = rotations[j * 3 + 1] * multiplier;
+                            values[(j * 3 + 2) * frames + i] = rotations[j * 3 + 2] * multiplier;
                         }
                     }
                     for (auto timeline : k_frame_keys) {
