@@ -888,8 +888,8 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                             }
                         }
                     }
-                    int num_indices = 6 * (actor->num_bones + 1);
-                    int num_values = 3 * actor->num_bones * frames + 1;
+                    int num_indices = 6 * actor->num_bones;
+                    int num_values = 3 * actor->num_bones * frames;
                     u16* indices = (u16*)malloc(sizeof(u16) * num_indices);
                     u16* values = (u16*)malloc(sizeof(u16) * num_values);
                     indices[0] = indices[2] = indices[4] = 1;
@@ -897,10 +897,10 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                     values[0] = 0;
                     float rotations[3 * 60];
                     for (int i = 0; i < actor->num_bones; i++) {
-                        indices[(i + 1) * 6 + 0] = indices[(i + 1) * 6 + 2] = indices[(i + 1) * 6 + 4] = frames;
-                        indices[(i + 1) * 6 + 1] = (i * 3 + 0) * frames + 1;
-                        indices[(i + 1) * 6 + 3] = (i * 3 + 1) * frames + 1;
-                        indices[(i + 1) * 6 + 5] = (i * 3 + 2) * frames + 1;
+                        indices[i * 6 + 0] = indices[i * 6 + 2] = indices[i * 6 + 4] = frames;
+                        indices[i * 6 + 1] = (i * 3 + 0) * frames;
+                        indices[i * 6 + 3] = (i * 3 + 1) * frames;
+                        indices[i * 6 + 5] = (i * 3 + 2) * frames;
                     }
                     for (int i = 0; i < frames; i++) {
                         get_animation_rotations(actor, rotations, i);
@@ -964,7 +964,8 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
             if (ImGui::BeginTable("Bone Editor", 2)) {
                 ImGui::TableNextRow();
                 if (actor->obj_model == MODEL_MARIO) {
-#define KF_BONE_ID "k_mariobone_" + std::to_string(currbone)
+#define KF_BONE_ID "k_mariobone_" + (currbone == 1 ? "t" : std::to_string(currbone - 1))
+                    BONE_ENTRY("Translation"    );
                     BONE_ENTRY("Root"           );
                     BONE_ENTRY("Body"           );
                     BONE_ENTRY("Torso"          );
@@ -989,8 +990,8 @@ void imgui_machinima_animation_player(MarioActor* actor, bool sampling) {
                 }
                 else {
                     for (int i = 0; i < actor->num_bones; i++) {
-#define KF_BONE_ID "k_objbone_" + std::to_string(currbone - 1)
-                        BONE_ENTRY(i == 0 ? "Root" : ("Bone " + std::to_string(i)).c_str());
+#define KF_BONE_ID "k_objbone_" + (currbone == 1 ? "t" : std::to_string(currbone - 2))
+                        BONE_ENTRY(i == 0 ? "Translation" : i == 1 ? "Root" : ("Bone " + std::to_string(i - 1)).c_str());
 #undef KF_BONE_ID
                     }
                 }

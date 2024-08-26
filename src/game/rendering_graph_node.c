@@ -787,7 +787,8 @@ static void geo_process_background(struct GraphNodeBackground *node) {
     }
 }
 
-static void anim_process(Vec3f translation, Vec3s rotation, u8 *animType, s16 animFrame, u16 **animAttribute) {
+static void anim_process(Vec3f translation, Vec3s rotation, u8 *animType, s16 animFrame, u16 **animAttribute, u8 interpolation) {
+    bool override_translation = false;
     if (*animType == ANIM_TYPE_TRANSLATION) {
         translation[0] += gCurAnimData[retrieve_animation_index(animFrame, animAttribute)]
                           * gCurAnimTranslationMultiplier;
@@ -796,6 +797,7 @@ static void anim_process(Vec3f translation, Vec3s rotation, u8 *animType, s16 an
         translation[2] += gCurAnimData[retrieve_animation_index(animFrame, animAttribute)]
                           * gCurAnimTranslationMultiplier;
         *animType = ANIM_TYPE_ROTATION;
+        override_translation = true;
     } else {
         if (*animType == ANIM_TYPE_LATERAL_TRANSLATION) {
             translation[0] +=
@@ -806,6 +808,7 @@ static void anim_process(Vec3f translation, Vec3s rotation, u8 *animType, s16 an
                 gCurAnimData[retrieve_animation_index(animFrame, animAttribute)]
                 * gCurAnimTranslationMultiplier;
             *animType = ANIM_TYPE_ROTATION;
+            override_translation = true;
         } else {
             if (*animType == ANIM_TYPE_VERTICAL_TRANSLATION) {
                 *animAttribute += 2;
@@ -814,16 +817,28 @@ static void anim_process(Vec3f translation, Vec3s rotation, u8 *animType, s16 an
                     * gCurAnimTranslationMultiplier;
                 *animAttribute += 2;
                 *animType = ANIM_TYPE_ROTATION;
+                override_translation = true;
             } else if (*animType == ANIM_TYPE_NO_TRANSLATION) {
                 *animAttribute += 6;
                 *animType = ANIM_TYPE_ROTATION;
+                override_translation = true;
             }
         }
+    }
+
+    if (override_translation && saturn_actor_bone_should_override()) {
+        Vec3s s;
+        Vec3f f;
+        saturn_actor_bone_do_override(s);
+        saturn_actor_bone_iterate();
+        vec3s_to_vec3f(f, s);
+        vec3f_copy(translation, f);
     }
 
     if (*animType == ANIM_TYPE_ROTATION) {
         if (saturn_actor_bone_should_override()) {
             saturn_actor_bone_do_override(rotation);
+            if (override_translation && interpolation) saturn_actor_bone_iterate_back();
             *animAttribute += 6;
         }
         else {
@@ -863,9 +878,9 @@ static void geo_process_animated_part(struct GraphNodeAnimatedPart *node) {
 
     // 60 FPS animation interpolation
     if (configFps60 == 1)
-        anim_process(translationInterpolated, rotationInterpolated, &animType, gPrevAnimFrame, &animAttribute);
+        anim_process(translationInterpolated, rotationInterpolated, &animType, gPrevAnimFrame, &animAttribute, 1);
 
-    anim_process(translation, rotation, &gCurAnimType, gCurrAnimFrame, &gCurrAnimAttribute);
+    anim_process(translation, rotation, &gCurAnimType, gCurrAnimFrame, &gCurrAnimAttribute, 0);
     saturn_actor_bone_iterate();
     interpolate_vectors(translationInterpolated, translationInterpolated, translation);
     interpolate_angles(rotationInterpolated, rotationInterpolated, rotation);
